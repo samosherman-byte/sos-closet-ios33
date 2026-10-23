@@ -1,0 +1,2 @@
+// Debug builds: the store is whichever Store.xcconfig names (sample or shopify).
+#include "Store.xcconfig"

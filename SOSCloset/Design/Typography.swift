@@ -1,0 +1,148 @@
+import SwiftUI
+import UIKit
+
+/// The site's two faces (SPEC §12), bundled in Fonts/ (both SIL Open Font License) and listed in Info.plist.
+/// These are PostScript names: a wrong one silently falls back to the system font, so `missing()` checks them.
+nonisolated enum Typeface: Hashable, Sendable {
+    /// Tenor Sans: the logo, headings and designers, in spaced capitals.
+    case display
+    /// Hanken Grotesk, 400–700: everything else. One file per weight: iOS doesn't find a variable font's
+    /// weights by name (the Mac does), so Google Fonts' static files of each weight are bundled instead.
+    case body(Weight)
+
+    enum Weight: Hashable, Sendable {
+        case regular, medium, semibold, bold
+    }
+
+    static let all: [Typeface] = [.display, .body(.regular), .body(.medium), .body(.semibold), .body(.bold)]
+
+    var postScriptName: String {
+        switch self {
+        case .display: "TenorSans"
+        case .body(.regular): "HankenGrotesk-Regular"
+        case .body(.medium): "HankenGrotesk-Medium"
+        case .body(.semibold): "HankenGrotesk-SemiBold"
+        case .body(.bold): "HankenGrotesk-Bold"
+        }
+    }
+
+    var familyName: String {
+        switch self {
+        case .display: "Tenor Sans"
+        case .body: "Hanken Grotesk"
+        }
+    }
+
+    /// The faces whose name doesn't find the bundled font (empty when they're all there).
+    static func missing() -> [Typeface] {
+        all.filter { UIFont(name: $0.postScriptName, size: 12)?.familyName != $0.familyName }
+    }
+}
+
+/// A text style from the site. Sizes are the site's, in points (a CSS pixel there is a point here), and they are
+/// the default size of a Dynamic Type style, growing with the iPhone's text size (APP-SPEC §6).
+nonisolated struct TextStyle: Hashable, Sendable {
+    var face: Typeface
+    var size: CGFloat
+    /// Letter spacing in em, as the site's CSS writes it (`letter-spacing: .16em`).
+    var tracking: CGFloat = 0
+    var uppercase = false
+    /// Line height as a multiple of the size, as the site's CSS writes it (`line-height: 1.65`); nil keeps the font's own.
+    var lineHeight: CGFloat? = nil
+
+    /// The Dynamic Type style it grows with: the one whose default size is nearest.
+    var relativeTo: Font.TextStyle {
+        switch size {
+        case ..<11.5: .caption2
+        case ..<12.5: .caption
+        case ..<13.5: .footnote
+        case ..<15.5: .subheadline
+        case ..<16.5: .callout
+        case ..<18.5: .body
+        case ..<21: .title3
+        case ..<25: .title2
+        case ..<31: .title
+        default: .largeTitle
+        }
+    }
+}
+
+// The styles phase 1 shares with the site, at its phone sizes (up to 640pt wide). Each says where it comes from.
+nonisolated extension TextStyle {
+    /// The logo, SOS CLOSET (the site's `.logo`): 22px, .34em; 17px, .24em up to 420px wide; 16px, .2em under 375px.
+    static let logo = TextStyle(face: .display, size: 22, tracking: 0.34, uppercase: true)
+    static let logoPhone = TextStyle(face: .display, size: 17, tracking: 0.24, uppercase: true)
+    static let logoNarrow = TextStyle(face: .display, size: 16, tracking: 0.2, uppercase: true)
+    /// The tab row on phones (SPEC §3): 11px, 500, .09em; 10.5px, .06em under 375px wide.
+    static let tab = TextStyle(face: .body(.medium), size: 11, tracking: 0.09, uppercase: true)
+    static let tabNarrow = TextStyle(face: .body(.medium), size: 10.5, tracking: 0.06, uppercase: true)
+    /// Section labels (SPEC §12): 12px, 600, .14em, uppercase.
+    static let sectionLabel = TextStyle(face: .body(.semibold), size: 12, tracking: 0.14, uppercase: true)
+    /// A category heading on a department page (SPEC §7, `.tsec-go` on phones): 15px, .16em, with a hairline to the right.
+    static let categoryHeading = TextStyle(face: .display, size: 15, tracking: 0.16, uppercase: true, lineHeight: 1.2)
+    /// A type heading (SPEC §7, `.tsub-go`): 12.5px, 600, .12em, in ink-2, with a small chevron.
+    static let typeHeading = TextStyle(face: .body(.semibold), size: 12.5, tracking: 0.12, uppercase: true)
+    /// A tile's label (SPEC §7, `.cn-label` on phones): 12px, 500; 11px under 375px wide.
+    static let tileLabel = TextStyle(face: .body(.medium), size: 12)
+    static let tileLabelNarrow = TextStyle(face: .body(.medium), size: 11)
+    /// Card text (SPEC §7): designer, name, price · size.
+    static let cardDesigner = TextStyle(face: .display, size: 13, tracking: 0.16, uppercase: true)
+    static let cardName = TextStyle(face: .body(.regular), size: 14, lineHeight: 1.4)
+    static let cardPrice = TextStyle(face: .body(.medium), size: 15)
+    static let cardSize = TextStyle(face: .body(.regular), size: 13)
+    /// A button (the site's `.btn`): 14px, 600, .04em.
+    static let button = TextStyle(face: .body(.semibold), size: 14, tracking: 0.04)
+}
+
+extension View {
+    /// Sets a site text style: its face, its size growing with Dynamic Type, its letter spacing and line height.
+    func textStyle(_ style: TextStyle) -> some View {
+        modifier(TextStyleModifier(style: style))
+    }
+}
+
+private struct TextStyleModifier: ViewModifier {
+    let style: TextStyle
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    func body(content: Content) -> some View {
+        let size = scaledSize
+        content
+            .font(.custom(style.face.postScriptName, size: style.size, relativeTo: style.relativeTo))
+            .tracking(style.tracking * size)
+            .textCase(style.uppercase ? .uppercase : nil)
+            .lineSpacing(lineSpacing(at: size))
+    }
+
+    /// The size the font has at the current text size, so letter spacing and line height grow with it.
+    private var scaledSize: CGFloat {
+        let traits = UITraitCollection(preferredContentSizeCategory: UIContentSizeCategory(dynamicTypeSize))
+        return UIFontMetrics(forTextStyle: style.relativeTo.uiTextStyle)
+            .scaledValue(for: style.size, compatibleWith: traits)
+    }
+
+    /// CSS sets a line's whole height; SwiftUI adds space between lines, so it's the difference.
+    private func lineSpacing(at size: CGFloat) -> CGFloat {
+        guard let multiple = style.lineHeight, let font = UIFont(name: style.face.postScriptName, size: size) else { return 0 }
+        return max(0, size * multiple - font.lineHeight)
+    }
+}
+
+private extension Font.TextStyle {
+    var uiTextStyle: UIFont.TextStyle {
+        switch self {
+        case .largeTitle: .largeTitle
+        case .title: .title1
+        case .title2: .title2
+        case .title3: .title3
+        case .headline: .headline
+        case .subheadline: .subheadline
+        case .body: .body
+        case .callout: .callout
+        case .footnote: .footnote
+        case .caption: .caption1
+        case .caption2: .caption2
+        @unknown default: .body
+        }
+    }
+}

@@ -5,3 +5,5 @@ SOS Closet's native iPhone app (SwiftUI, iOS 26 and later): a second storefront 
 - `APP-SPEC.md`: what the app does, what it shares with the website (whose `SPEC.md` is the source of truth) and what's native instead.
 - `CLAUDE.md`: the rules for building it.
 - `docs/mac-setup.md`: setting up the Mac (Xcode, Claude Code, your iPhone).
+
+After cloning, with the website repo cloned next to this one: run `tools/sync-sample-store.sh` (it copies the sample store and the site's photos in; they stay out of git), then open `SOSCloset.xcodeproj` in Xcode.

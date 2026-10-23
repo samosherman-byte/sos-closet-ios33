@@ -1,0 +1,3 @@
+// Release builds always read Sam's store and leave the sample store out (APP-SPEC.md §5).
+#include? "Secrets.xcconfig"
+SOS_STORE = shopify
