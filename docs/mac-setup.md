@@ -32,7 +32,7 @@ The session you had in the Claude app ran in the cloud, which can't reach Xcode.
 
 **What to type first:**
 
-> Continue the SOS Closet iOS app. The repo is samosherman-byte/sos-closet-ios: clone it into this folder if it isn't here. Read CLAUDE.md and APP-SPEC.md, then start at "Where we are › Next".
+> Continue the SOS Closet iOS app. The repo is samosherman-byte/sos-closet-ios33: clone it into this folder if it isn't here. Read CLAUDE.md and APP-SPEC.md, then start at "Where we are › Next".
 
 (If the repo isn't on GitHub yet, save the files Claude sent you into the folder first, and leave out the second sentence.)
 

@@ -23,7 +23,7 @@ Sam is not an engineer. Explain every change in plain language, and say exactly 
 - **Shopify:** ask Sam before creating, changing or deleting anything in his store (products, collections, settings, apps, channels).
 - **The Storefront token:** the public token and the store address go in `Config/Secrets.xcconfig` on this Mac (git-ignored; `Config/Secrets.example.xcconfig` shows the format). Never in git, never in a chat. When the app needs it, tell Sam where the file is and that he pastes it himself; it's in Shopify's Headless channel (the site's `docs/shopify-setup.md`, step 7). Never ask for passwords, private tokens or Admin API keys.
 - **Apple:** don't sign up for, pay for or register anything with Apple without asking Sam. That includes the Apple Developer Program, registering the app ID `com.soscloset.app` (it can't change once the app is in the App Store), App Store Connect records, TestFlight and push certificates. To put the app on Sam's iPhone, use his free Apple Account (a Personal Team) and walk him through it (`docs/mac-setup.md`, part 3), **always with the bundle ID `com.soscloset.app.dev`, never `com.soscloset.app`**: signing with a free account registers the ID under it, and Apple then won't release it to the paid account the App Store needs.
-- **GitHub:** this repo is private, `samosherman-byte/sos-closet-ios`. Ask before creating anything else on GitHub.
+- **GitHub:** this repo is `samosherman-byte/sos-closet-ios33`, and it is **public**: anyone can read everything committed here, including old commits. So the token never goes in it (above), and nothing copied from the website goes in it either: the sample store, the product photos, the cutout tiles and the home page's photos are copied in by `tools/sync-sample-store.sh` and git-ignored (`SampleStore/`, `SiteAssets/`). No customer or order data, no Shopify admin details, and commit as Claude (`noreply@anthropic.com`), never with Sam's own email. Ask before creating anything else on GitHub.
 - **Product copy** (if the app ever writes any): never mention condition or missing measurements; keyword-rich, helpful and direct, not overly clever; if an item is made in China, don't mention it.
 
 ## Design rules
@@ -39,7 +39,7 @@ Sam is not an engineer. Explain every change in plain language, and say exactly 
 - Before each step's work: `xcodebuild -version` and `xcrun simctl list devices available` to see what's installed.
 - After each step: build, run in the Simulator at a small iPhone and a large one (the smallest and the Pro Max the installed Simulator offers), take screenshots (`xcrun simctl io booted screenshot`), and compare them side by side with the prototype at the same size in the Simulator's Safari. Show Sam the pairs and say what differs.
 - Unit tests (Swift Testing) cover the catalog mapping, the photo size standard and the bag; they mirror the site's `app/lib/catalog/catalog.test.ts` and `app/lib/bag/bag.test.ts`. Run them before every merge.
-- The sample store: `tools/sync-sample-store.sh` copies the site's import files, photo sizes, tiles and photos into `SampleStore/` (git-ignored) unchanged. Release builds leave it out.
+- The sample store: `tools/sync-sample-store.sh` copies the site's import files, photo sizes and the prototype's photos into `SampleStore/`, and the cutout tiles and home page photos (which ship in the app) into `SiteAssets/`, unchanged; both are git-ignored, so run it after cloning. Release builds leave the sample store out.
 
 ## Branches
 

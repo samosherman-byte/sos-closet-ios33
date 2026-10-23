@@ -13,8 +13,10 @@ xcuserdata/
 # The Storefront token and store address stay on this Mac, never in git (APP-SPEC.md, "Config")
 Config/Secrets.xcconfig
 
-# The sample store's files are copied from the site by tools/sync-sample-store.sh, never committed here
+# Copied from the site by tools/sync-sample-store.sh, never committed here (this repo is public):
+# the sample store (import files, photo sizes, the prototype's photos) and the photos the app ships
 SampleStore/
+SiteAssets/
 
 # Simulator screenshots taken while comparing with the prototype (keep the ones worth keeping in docs/img/)
 screenshots/

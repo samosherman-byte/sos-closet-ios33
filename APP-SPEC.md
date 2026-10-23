@@ -119,7 +119,7 @@ Not native on purpose: **the tab row is still the map** (SPEC §1.1), the header
 
 - **One switch:** `Config/Store.xcconfig` → `SOS_STORE = sample` or `shopify`. Debug builds use it; release builds always read Sam's store and leave the sample store out (the site's production builds do the same).
 - **The token:** `Config/Secrets.xcconfig` on this Mac only (git-ignored), with `SHOPIFY_STORE_DOMAIN` and `SHOPIFY_STOREFRONT_TOKEN` (the format is in `Config/Secrets.example.xcconfig`). Sam pastes them himself from the Headless channel (the site's `docs/shopify-setup.md`, step 7). It's Shopify's *public* token, meant to be inside apps and web pages; the private token is never used.
-- **The sample store** reads the same import files the site's `npm run dev:sample` reads, `data/shopify-products.csv` and `data/product-images.csv` (both built from `data/catalog.json`), with the photo sizes in `data/photo-fit.json` and the prototype's photos in `prototype/img/`. It goes through the same mapper as Shopify's answers, so it checks the import file too, and the sample store looks exactly like what Shopify will send. `tools/sync-sample-store.sh` copies those files, `public/tiles/` and `public/home/` from `../sos-closet-storefront` into `SampleStore/` and `Resources/` unchanged, and notes the site's commit.
+- **The sample store** reads the same import files the site's `npm run dev:sample` reads, `data/shopify-products.csv` and `data/product-images.csv` (both built from `data/catalog.json`), with the photo sizes in `data/photo-fit.json` and the prototype's photos in `prototype/img/`. It goes through the same mapper as Shopify's answers, so it checks the import file too, and the sample store looks exactly like what Shopify will send. `tools/sync-sample-store.sh` copies those files into `SampleStore/`, and the site's `public/tiles/` and `public/home/` (the cutouts and the home page's photos, which ship in the app) into `SiteAssets/`, unchanged, from `../sos-closet-storefront`, and notes the site's commit. Both folders are git-ignored: this repo is public, and the photos stay out of it.
 - **Endpoint:** `POST https://{SHOPIFY_STORE_DOMAIN}/api/2026-10/graphql.json` with the `X-Shopify-Storefront-Access-Token` header. 2026-10 is the current stable Storefront API (supported until October 2027); the site is on 2026-04 through its Hydrogen version (supported until April 2027). The queries the app uses are the same in both. Move to the next version once a year, when Shopify announces it.
 
 ## 6. Accessibility
@@ -140,7 +140,7 @@ Before building the navigation, both are built as quick screens on the sample st
 
 ## 8. Decisions for Sam
 
-- [ ] **Create the private GitHub repo `sos-closet-ios`** for this app (asked October 23).
+- [x] **The GitHub repo:** `samosherman-byte/sos-closet-ios33`, public (Sam, October 23).
 - [ ] **Navigation: A or B** (§7), once the Simulator screenshots are in front of him. Recommended: A.
 - [ ] **Saved in phase 1:** Menu opens a short interim list with Saved (and its count) until the directory exists. [Default: yes.]
 - [ ] **The Latest's "See all" and Home's "Shop new arrivals"** wait for New Arrivals (phase 2). [Default: left out in phase 1.]
