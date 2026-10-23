@@ -1,0 +1,20 @@
+# Xcode and Swift build output
+DerivedData/
+build/
+.build/
+.swiftpm/
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+
+# macOS
+.DS_Store
+
+# The Storefront token and store address stay on this Mac, never in git (APP-SPEC.md, "Config")
+Config/Secrets.xcconfig
+
+# The sample store's files are copied from the site by tools/sync-sample-store.sh, never committed here
+SampleStore/
+
+# Simulator screenshots taken while comparing with the prototype (keep the ones worth keeping in docs/img/)
+screenshots/
