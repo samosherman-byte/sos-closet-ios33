@@ -96,6 +96,8 @@ Hearts are kept on the phone (the site keeps them in the browser), by the piece'
 
 ## 4. Native instead
 
+**Sam, October 23 (after seeing the first build):** "I don't want this to just be a copy of the website, I want it to take advantage of it being a native app." So the app is the same closet and the same brand, not the same screens: wherever an iPhone can do something better than a web page, the app does it the iPhone's way, and the site's layout is a reference, not a template. What stays the site's are the brand and the principles behind it (SPEC §1: always know where you are, say it once, the photos as they are, no glass on content, the page adapts and your place doesn't). The navigation (§7) is where this is decided first.
+
 Where iOS has its own way of doing something, the app uses it instead of copying the web code. Each of these keeps the site's intent (the "why" in SPEC and `docs/design-decisions.md`); `docs/platform-notes.md` has the API names and links.
 
 | The site | The app | Why |
@@ -162,8 +164,14 @@ Before building the navigation, both are built as quick screens on the sample st
   - **A first screen** (`SetupCheckView`, temporary until the navigation): the build's store, the fonts, the tiles, the type styles and colors. Unit tests (fonts found by name, each weight its own face, the Dynamic Type mapping, the gutter) pass. Run on the iPhone 17e (390 × 844, the smallest the Simulator offers; nothing at 375 or under) and the iPhone 18 Pro Max (440 × 956), compared with the prototype's Women page in each Simulator's Safari: the type matches.
   - **Found in the site, not changed there:** the header's logo has the class `intro` (its opening animation), and `.intro` is also the old intro-paragraph style (`06-browse.css`: 17px, ink-2, 14px margin), which comes later in the CSS. So wider than 420px (the Pro Max, and desktop) the site's and the prototype's logo shows at 17px, not the 22px its own rule says. The app follows the logo's own rule (22pt over 420pt wide). *Sam to decide whether the site should be fixed (in a site session), or the app match it.*
   - Not yet: the app icon. The site's home-screen icon is the stone on ivory (SPEC §12); the app needs a 1024px one, made by the site's `make_brand_images.py`. *Sam to say whether the logo's images can go in this public repo* (CLAUDE.md keeps what's copied from the site out of it).
+- **October 23, later:** Sam saw the screenshots; `setup/project` merged into `main`. Sam: the app should take advantage of being native, not copy the site (§4). **Branch `nav/directions`, paused at Sam's request** (he's building the UI in another conversation), unmerged:
+  - Both directions run on the sample store (`SOSCloset/Directions/`, chosen at launch; `Demo.swift` has launch arguments for screenshots). Shared: the map (`Navigation/Place.swift`), a native paging pager (swipe between departments under the finger; a tab glides there), the tab row whose underline follows the pager, a CSV reader for the import files (`Catalog/CSV.swift`), sizes in words (`Catalog/Sizes.swift`, the site's `sizeWords`), and a photo loader (`Design/Photo.swift`). `Directions/QuickSample.swift` and `QuickPages.swift` are stand-ins until data/catalog and the browse and home steps.
+  - **A:** the flat header at rest; scrolling down, the tabs dematerialize and Menu and Bag float in Liquid Glass; scrolling up brings the header back; Menu opens the interim list as a sheet. Checked in screenshots on the iPhone 17e.
+  - **B:** the system Liquid Glass tab bar (Home, Shop, Saved, Bag, set to shrink while scrolling down), the logo and the department row at the top of Shop. Not yet checked with a real finger: whether the tab bar shrinks over the pager.
+  - Learned: a header floating over the pager gets the system scroll edge effect through an empty `safeAreaBar` on each page, but only if the bar isn't fully clear (1% white works); the **hard** edge style keeps the logo and the department words readable over photos, the soft one doesn't.
+  - Started, not run: a UI test target (`SOSClosetUITests/DirectionsTour.swift`, runs only with `TEST_RUNNER_SOS_TOUR=A` or `B`) that swipes and taps through each direction, to record the Simulator for Sam.
 - **Next:**
-  1. Sam looks at the screenshots of `setup/project`; merge it into `main`.
-  2. Branch `nav/directions`: directions A and B on the sample store; screenshots beside the prototype; Sam picks.
+  1. When Sam picks this up again: reconcile with the UI from his other conversation, then finish `nav/directions` (the recorded tours at both sizes, beside the prototype) and Sam picks.
+  2. ~~Branch `nav/directions`~~ (above).
   3. Then `data/catalog`, `browse/departments`, `home`, `product/page`, `bag/checkout`, `saved`, each built, tested, run at both sizes and compared with the prototype.
   4. When phase 1 runs: put it on Sam's iPhone with his free Apple Account (`docs/mac-setup.md`, part 3).

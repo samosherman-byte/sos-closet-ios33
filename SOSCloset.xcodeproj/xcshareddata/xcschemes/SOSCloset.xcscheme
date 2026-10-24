@@ -39,6 +39,17 @@
                ReferencedContainer = "container:SOSCloset.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "5C050000000000000000002A"
+               BuildableName = "SOSClosetUITests.xctest"
+               BlueprintName = "SOSClosetUITests"
+               ReferencedContainer = "container:SOSCloset.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

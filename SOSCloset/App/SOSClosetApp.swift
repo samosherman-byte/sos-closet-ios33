@@ -12,7 +12,7 @@ struct SOSClosetApp: App {
 
     var body: some Scene {
         WindowGroup {
-            SetupCheckView()
+            DirectionsRoot()
         }
     }
 }
