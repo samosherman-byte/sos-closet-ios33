@@ -1,0 +1,100 @@
+{
+  "about": "The app prototype's screens, in the order and groups of Claude's design canvas (\"SOS Closet App Prototype\"). build.py writes them to build/.",
+  "groups": [
+    {
+      "name": "Home",
+      "boards": [
+        {
+          "name": "Main",
+          "title": "Home, live: turn the bags",
+          "live": true
+        },
+        {
+          "name": "HomeRooms",
+          "title": "Home, scrolled: the rooms",
+          "live": false
+        }
+      ]
+    },
+    {
+      "name": "Shop",
+      "boards": [
+        {
+          "name": "Shop",
+          "title": "1 · Women, live (scroll it)",
+          "live": true
+        },
+        {
+          "name": "ShopDown",
+          "title": "2 · Scrolling down: the place line and Filter",
+          "live": false
+        },
+        {
+          "name": "ShopUp",
+          "title": "3 · Scrolling back up: the tabs and small tiles return",
+          "live": false
+        },
+        {
+          "name": "ShopDirectory",
+          "title": "4 · The directory, from the place line",
+          "live": false
+        },
+        {
+          "name": "ShopFilter",
+          "title": "5 · Filter: Search on its rows",
+          "live": false
+        },
+        {
+          "name": "ShopAll",
+          "title": "6 · Shop All",
+          "live": false
+        },
+        {
+          "name": "ShopCase",
+          "title": "7 · Jewelry & Objects, a small case",
+          "live": false
+        }
+      ]
+    },
+    {
+      "name": "The piece, the bag, Saved and Search",
+      "boards": [
+        {
+          "name": "Product",
+          "title": "Product, live",
+          "live": true
+        },
+        {
+          "name": "ProductScrolled",
+          "title": "Product, scrolled: Back and the place line float",
+          "live": false
+        },
+        {
+          "name": "Bag",
+          "title": "Bag",
+          "live": true
+        },
+        {
+          "name": "Saved",
+          "title": "Saved",
+          "live": true
+        },
+        {
+          "name": "Search",
+          "title": "Search, typing (live)",
+          "live": true
+        }
+      ]
+    },
+    {
+      "name": "Components",
+      "boards": [
+        {
+          "name": "TabBar",
+          "title": "Tab bar (toggle compact in Tweaks)",
+          "live": true
+        }
+      ]
+    }
+  ]
+}

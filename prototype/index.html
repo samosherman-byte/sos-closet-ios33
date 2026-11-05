@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<title>SOS Closet app prototype</title>
+<style>
+:root{color-scheme:light only}
+body{margin:0;background:#ECEBE8;color:#111111;font:14px/1.4 -apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif}
+.wrap{display:flex;gap:32px;align-items:flex-start;justify-content:center;padding:24px}
+#nav{width:260px;flex:none;position:sticky;top:24px}
+#nav h1{margin:0 0 4px;font-size:15px}
+#nav p{margin:0 0 16px;color:#6E6E6B;font-size:13px}
+#nav h2{margin:18px 0 6px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#6E6E6B}
+#nav a{display:block;padding:5px 8px;border-radius:8px;color:#111111;text-decoration:none}
+#nav a[aria-current=page]{background:#FFFFFF;font-weight:600}
+#nav a span{color:#6E6E6B;font-size:12px}
+#stage{position:relative;width:390px;height:844px;flex:none;overflow:hidden;background:#FFFFFF;border-radius:55px;box-shadow:0 0 0 10px #111111,0 30px 60px -20px rgba(0,0,0,.35)}
+#stage > div{position:relative;width:390px;height:844px}
+/* In the Simulator's Safari (or any phone): just the screen, top left, so it compares with the app at the same size. */
+@media (max-width:600px){body{background:#FFFFFF}.wrap{padding:0;display:block}#nav{display:none}#stage{border-radius:0;box-shadow:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav aria-label="Screens" id="nav"><h1>SOS Closet app prototype</h1><p>Screens marked live can be scrolled and tapped. On a phone, add #Main, #Shop… to the address to pick a screen.</p></nav>
+<div id="stage"></div>
+</div>
+<script src="dc.js"></script>
+<script>
+fetch('boards.json').then(function (r) { return r.json(); }).then(function (b) {
+  var nav = document.getElementById('nav'), names = [];
+  b.groups.forEach(function (g) {
+    var h = document.createElement('h2'); h.textContent = g.name; nav.appendChild(h);
+    g.boards.forEach(function (x) {
+      names.push(x.name);
+      var a = document.createElement('a'); a.href = '#' + x.name; a.setAttribute('data-board', x.name);
+      a.textContent = x.title + ' '; if (x.live) { var s = document.createElement('span'); s.textContent = '· live'; a.appendChild(s); }
+      nav.appendChild(a);
+    });
+  });
+  return SOSProto.start(names);
+}).catch(function (e) {
+  document.getElementById('stage').innerHTML = '<p style="padding:40px;font:15px -apple-system,sans-serif">The screens aren’t built yet, or this page isn’t served from the repo’s root folder. Run <code>python3 prototype/build.py</code>, then <code>python3 -m http.server 8000</code> in the repo’s folder, and open http://localhost:8000/prototype/.<br><br>' + e + '</p>';
+});
+</script>
+</body>
+</html>

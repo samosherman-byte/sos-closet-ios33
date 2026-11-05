@@ -20,3 +20,7 @@ SiteAssets/
 
 # Simulator screenshots taken while comparing with the prototype (keep the ones worth keeping in docs/img/)
 screenshots/
+
+# The app prototype's built screens (prototype/build.py): they carry pieces and photo paths from the website
+prototype/build/
+__pycache__/

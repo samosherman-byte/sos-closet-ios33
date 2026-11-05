@@ -11,7 +11,8 @@ Sam is not an engineer. Explain every change in plain language, and say exactly 
 1. `APP-SPEC.md`: what the app does, what's the same as the site, what's native instead and why, and what phase 1 builds. Its "Where we are" section says what's done and what's next.
 2. The website's `CLAUDE.md`, `SPEC.md` and `docs/design-decisions.md`, in the website repo next to this one (`../sos-closet-storefront`). **The site's SPEC.md is the source of truth for every shared behavior and the reason for it.** APP-SPEC.md points to its sections instead of copying them; when the two seem to disagree, ask Sam.
 3. `docs/platform-notes.md`: what Apple's and Shopify's current documentation says about Liquid Glass, tab bars, toolbars, the scroll edge effect, the zoom transition, sheets, Checkout Kit and the Storefront API cart, with links. Check a page again before relying on it for something new; these APIs change every year.
-4. The prototype (`../sos-closet-storefront/prototype/`): the look and motion to match. Run it with `cd ../sos-closet-storefront/prototype && python3 -m http.server 8000`; open http://localhost:8000 in the Simulator's own Safari (`xcrun simctl openurl booted http://localhost:8000`) to compare at exactly the same size.
+4. **The app prototype** (`prototype/` in this repo; `prototype/README.md` says how to build and run it): every screen of the app as Sam approved it on Claude's design canvas, at the iPhone's size, with the app's own decisions (the native tab bar, Home as on soscloset.com). **It's the look and motion to build to.** Serve the repo's folder (`python3 -m http.server 8000`) and open `http://localhost:8000/prototype/#Shop` (or `#Main`, `#Product`…) in the Simulator's own Safari (`xcrun simctl openurl booted …`) to compare at exactly the same size.
+5. `docs/design-decisions.md`: the app's own decisions and why. The website's prototype (`../sos-closet-storefront/prototype/`) is the reference for anything the app prototype doesn't show.
 
 ## The website repo is read-only
 
@@ -37,10 +38,10 @@ Sam is not an engineer. Explain every change in plain language, and say exactly 
 ## Building and checking
 
 - Before each step's work: `xcodebuild -version` and `xcrun simctl list devices available` to see what's installed.
-- After each step: build, run in the Simulator at a small iPhone and a large one (the smallest and the Pro Max the installed Simulator offers), take screenshots (`xcrun simctl io booted screenshot`), and compare them side by side with the prototype at the same size in the Simulator's Safari. Show Sam the pairs and say what differs.
+- After each step: build, run in the Simulator at a small iPhone and a large one (the smallest and the Pro Max the installed Simulator offers), take screenshots (`xcrun simctl io booted screenshot`), and compare them side by side with the same screen of the app prototype (`prototype/`) at the same size in the Simulator's Safari. Show Sam the pairs and say what differs.
 - Unit tests (Swift Testing) cover the catalog mapping, the photo size standard and the bag; they mirror the site's `app/lib/catalog/catalog.test.ts` and `app/lib/bag/bag.test.ts`. Run them before every merge.
 - The sample store: `tools/sync-sample-store.sh` copies the site's import files, photo sizes and the prototype's photos into `SampleStore/`, and the cutout tiles and home page photos (which ship in the app) into `SiteAssets/`, unchanged; both are git-ignored, so run it after cloning. Release builds leave the sample store out.
 
 ## Branches
 
-One branch per piece of work (`setup/project`, `nav/directions`, `data/catalog`, `browse/departments`, `home`, `product/page`, `bag/checkout`, `saved`). Merge into `main` when the step builds, its tests pass and Sam has seen the screenshots. Commit with clear messages; push only to this repo.
+One branch per piece of work (`data/catalog`, `nav/tab-bar`, `home`, `browse/departments`, `product/page`, `bag/checkout`, `saved`; `nav/directions` is superseded, don't merge it). Design changes come in on `prototype/…` branches (the prototype, APP-SPEC.md and `docs/design-decisions.md`, no app code); merge those first. Merge into `main` when the step builds, its tests pass and Sam has seen the screenshots. Commit with clear messages; push only to this repo.
