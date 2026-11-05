@@ -187,6 +187,8 @@ private final class FrameTicker: NSObject {
 /// scrolling they pass under the header like every other piece.
 struct TurntableView: View {
     let bags: [TableBag]
+    /// The bag in front to begin with (the Jackie).
+    let front: Int
     let width: CGFloat
     let model: TurntableModel
 
@@ -228,7 +230,7 @@ struct TurntableView: View {
             ended: { vx in model.dragEnded(v: -vx / 1000, reduceMotion: reduceMotion) }
         ))
         .task { readMaps() }
-        .onAppear { model.appear(front: 1, reduceMotion: reduceMotion) }
+        .onAppear { model.appear(front: front, reduceMotion: reduceMotion) }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Three bags on a turntable")
         .accessibilityValue(bags.indices.contains(model.front) ? bags[model.front].label : "")

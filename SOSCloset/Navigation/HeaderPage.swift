@@ -7,6 +7,8 @@ struct HeaderPage<Content: View>: View {
     var current: ShopPlace?
     /// Home and Shop show the tab row; Saved and the bag show the top row alone.
     var showsMap = true
+    /// Pull to refresh fetches the closet again (APP-SPEC §3.1).
+    var refresh: (@MainActor @Sendable () async -> Void)? = nil
     @ViewBuilder var content: (_ width: CGFloat) -> Content
 
     @Environment(AppState.self) private var app
@@ -23,6 +25,7 @@ struct HeaderPage<Content: View>: View {
             }
             .scrollIndicators(.hidden)
             .scrollPosition($position)
+            .refreshable(enabled: refresh != nil) { await refresh?() }
             .onScrollGeometryChange(for: CGFloat.self) { $0.contentOffset.y + $0.contentInsets.top } action: { _, y in
                 scroll.update(offset: y)
                 scrolled = y > 6
@@ -50,5 +53,12 @@ struct HeaderPage<Content: View>: View {
             position.scrollTo(y: y)
         }
         #endif
+    }
+}
+
+private extension View {
+    /// Pull to refresh only where the page has something to refresh.
+    @ViewBuilder func refreshable(enabled: Bool, action: @escaping @Sendable () async -> Void) -> some View {
+        if enabled { refreshable(action: action) } else { self }
     }
 }

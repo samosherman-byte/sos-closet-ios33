@@ -51,6 +51,11 @@ final class AppState {
         #endif
     }
 
+    /// Opens a piece. Until the product page is built (`product/page`), it opens the piece's department.
+    func open(_ piece: Piece) {
+        open(piece.dept.map(ShopPlace.init) ?? .all)
+    }
+
     /// Opens Shop at a place on the map: from Home it's always a move to the right (Home is left of everything).
     func open(_ next: ShopPlace) {
         let from = tab == .shop ? place.rawValue : -1

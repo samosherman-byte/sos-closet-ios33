@@ -7,6 +7,10 @@ import SwiftUI
 /// own round button.
 struct RootView: View {
     @State private var app = AppState()
+    /// The closet, from this build's store: fetched when the app opens and again when it comes back after a minute or
+    /// more (APP-SPEC §3.1, Freshness).
+    @State private var closet = Closet.forThisBuild()
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         @Bindable var app = app
@@ -37,6 +41,9 @@ struct RootView: View {
         .tabBarMinimizeBehavior(.onScrollDown)
         .tint(.ink)
         .environment(app)
+        .environment(closet)
+        .task { await closet.load() }
+        .onChange(of: scenePhase) { _, phase in _ = closet.scenePhaseChanged(to: phase) }
     }
 
     /// Outlined, and filled only when selected, as in the app prototype (the system would fill them all). The hanger

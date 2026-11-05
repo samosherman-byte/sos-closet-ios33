@@ -7,14 +7,14 @@ import UIKit
 /// footer's disclosure. Under the header with no tab underlined; Menu and the logo stay as you scroll.
 struct HomeView: View {
     @Environment(AppState.self) private var app
-    @State private var table = TurntableModel(count: 3, front: 1)
-
-    var content: HomeContent = .preview
+    @Environment(Closet.self) private var closet
+    @State private var table = TurntableModel(count: Merch.turntable.bags.count, front: Merch.turntable.front)
 
     var body: some View {
-        HeaderPage(current: nil) { width in
+        let content = HomeContent.make(closet: closet, app: app)
+        HeaderPage(current: nil, refresh: { await closet.refresh() }) { width in
             VStack(spacing: 0) {
-                opening(width: width)
+                opening(width: width, content: content)
                 ForEach(content.rooms) { room in
                     RoomRowView(room: room, width: width) { app.open(room.place) }
                         .padding(.top, 64)
@@ -29,7 +29,7 @@ struct HomeView: View {
 
     /// Centred: "Beautiful things.", one line under it, Shop women (solid ink) and Shop men (outlined), then the
     /// turntable. 32pt above the words; 6pt between the buttons and the table (SPEC §11a, phones).
-    private func opening(width: CGFloat) -> some View {
+    private func opening(width: CGFloat, content: HomeContent) -> some View {
         VStack(spacing: 0) {
             Text("Beautiful things.")
                 .textStyle(.homeTitle)
@@ -48,7 +48,7 @@ struct HomeView: View {
                 shopButton("Shop men", solid: false) { app.open(.men) }
             }
             .padding(.top, 22)
-            TurntableView(bags: content.bags, width: width, model: table)
+            TurntableView(bags: content.bags, front: Merch.turntable.front, width: width, model: table)
                 .padding(.top, 6)
         }
         .padding(.top, 32)
@@ -79,13 +79,6 @@ struct HomeContent {
     var rooms: [HomeRoomRow]
 
     static let empty = HomeContent(bags: [], rooms: [])
-
-    /// Until the closet is wired in: the bags with their names only.
-    static let preview = HomeContent(bags: [
-        TableBag(id: "lv-brea", image: cutout("cut-lv-brea.webp"), cm: 33, top: 0.128, bot: 0.871, designer: "Louis Vuitton", name: "Bréa", sub: "New arrival", label: "Louis Vuitton Bréa, New arrival", open: {}),
-        TableBag(id: "jackie", image: cutout("cut-jackie.webp"), cm: 34, top: 0.074, bot: 0.927, designer: "Gucci", name: "Jackie 1961", sub: "$2,600", label: "Gucci Jackie 1961, $2,600", open: {}),
-        TableBag(id: "bamboo", image: cutout("cut-bamboo.webp"), cm: 29, top: 0.1, bot: 0.9, designer: "Gucci", name: "Bamboo", sub: "$1,250", label: "Gucci Bamboo, $1,250", open: {}),
-    ], rooms: [])
 }
 
 // MARK: - The rooms
