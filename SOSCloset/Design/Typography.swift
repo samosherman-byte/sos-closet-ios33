@@ -92,6 +92,26 @@ nonisolated extension TextStyle {
     static let cardSize = TextStyle(face: .body(.regular), size: 13)
     /// A button (the site's `.btn`): 14px, 600, .04em.
     static let button = TextStyle(face: .body(.semibold), size: 14, tracking: 0.04)
+
+    // Home (SPEC §11a; the site's 05-home.css at phone widths, as the app prototype has them).
+    /// "Beautiful things.": the display face, 40px, .01em, line height 1.06.
+    static let homeTitle = TextStyle(face: .display, size: 40, tracking: 0.01, lineHeight: 1.06)
+    /// "Louis Vuitton, Gucci, Hermès and more.": 15px, line height 1.6, in ink-2.
+    static let homeLine = TextStyle(face: .body(.regular), size: 15, lineHeight: 1.6)
+    /// Shop women and Shop men: 12px, 600, .16em spaced capitals.
+    static let homeButton = TextStyle(face: .body(.semibold), size: 12, tracking: 0.16, uppercase: true)
+    /// A credit's designer, under a bag on the turntable and under a piece in a room: 10px, .15em spaced capitals.
+    static let creditDesigner = TextStyle(face: .display, size: 10, tracking: 0.15, uppercase: true)
+    /// A credit's name and price: 11px (muted, the name in ink-2).
+    static let creditLine = TextStyle(face: .body(.regular), size: 11)
+    /// A room's title, which is its link: 13px, .22em spaced capitals.
+    static let roomTitle = TextStyle(face: .display, size: 13, tracking: 0.22, uppercase: true, lineHeight: 1.2)
+    /// The service notes at the foot of Home: the titles 13px .2em spaced capitals, the words and links 16px.
+    static let noteTitle = TextStyle(face: .display, size: 13, tracking: 0.2, uppercase: true)
+    static let noteText = TextStyle(face: .body(.regular), size: 16, lineHeight: 1.5)
+    static let noteLink = TextStyle(face: .body(.regular), size: 16)
+    /// The footer's disclosure (SPEC §2): 12px, line height 1.5, muted.
+    static let disclosure = TextStyle(face: .body(.regular), size: 12, lineHeight: 1.5)
 }
 
 extension View {
@@ -112,6 +132,14 @@ private struct TextStyleModifier: ViewModifier {
             .tracking(style.tracking * size)
             .textCase(style.uppercase ? .uppercase : nil)
             .lineSpacing(lineSpacing(at: size))
+            .padding(.vertical, halfLeading(at: size))
+    }
+
+    /// CSS centres each line in its line box, adding (or, under the font's own height, taking away) half the difference
+    /// above the first line and below the last; SwiftUI doesn't, so the text's frame is matched to the CSS line box.
+    private func halfLeading(at size: CGFloat) -> CGFloat {
+        guard let multiple = style.lineHeight, let font = UIFont(name: style.face.postScriptName, size: size) else { return 0 }
+        return (size * multiple - font.lineHeight) / 2
     }
 
     /// The size the font has at the current text size, so letter spacing and line height grow with it.

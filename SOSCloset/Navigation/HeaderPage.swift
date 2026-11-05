@@ -12,6 +12,7 @@ struct HeaderPage<Content: View>: View {
     @Environment(AppState.self) private var app
     @State private var scroll = HeaderScroll()
     @State private var scrolled = false
+    @State private var position = ScrollPosition(edge: .top)
 
     var body: some View {
         GeometryReader { geometry in
@@ -21,6 +22,7 @@ struct HeaderPage<Content: View>: View {
                     .frame(width: width)
             }
             .scrollIndicators(.hidden)
+            .scrollPosition($position)
             .onScrollGeometryChange(for: CGFloat.self) { $0.contentOffset.y + $0.contentInsets.top } action: { _, y in
                 scroll.update(offset: y)
                 scrolled = y > 6
@@ -38,5 +40,15 @@ struct HeaderPage<Content: View>: View {
         }
         .background(.paper)
         .toolbar(.hidden, for: .navigationBar)
+        #if DEBUG
+        .task {
+            // For side-by-side screenshots with the prototype's still moments: `-SOSPreviewScroll 560` opens the page
+            // scrolled that far down (the header as if scrolling down). Debug builds only.
+            let y = UserDefaults.standard.double(forKey: "SOSPreviewScroll")
+            guard y > 0 else { return }
+            try? await Task.sleep(for: .milliseconds(600))
+            position.scrollTo(y: y)
+        }
+        #endif
     }
 }
