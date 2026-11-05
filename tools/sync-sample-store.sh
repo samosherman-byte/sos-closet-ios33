@@ -6,7 +6,8 @@
 #   SampleStore/  the sample store, for building and testing (Debug builds only; release builds leave it out):
 #                 the site's import files (data/shopify-products.csv, data/product-images.csv), the photo sizes
 #                 (data/photo-fit.json), the catalog the tests check the mapping against (data/catalog.json),
-#                 and the prototype's photos (prototype/img/*.jpg), at the same paths as in the site, so the
+#                 the stand-ins for what the live store keeps in Shopify (data/merch.json: the case's story
+#                 lines and featured piece, and the home page's "Home row" collections), and the prototype's photos (prototype/img/*.jpg), at the same paths as in the site, so the
 #                 import file's photo paths work as they are.
 #   SiteAssets/   the photos the app ships: the category cutouts (public/tiles/) and the home page's (public/home/).
 #
@@ -26,7 +27,7 @@ site="$(cd "$site" && pwd)"
 
 mkdir -p "$here/SampleStore/data" "$here/SampleStore/prototype/img" "$here/SiteAssets/tiles" "$here/SiteAssets/home"
 
-for f in shopify-products.csv product-images.csv photo-fit.json catalog.json; do
+for f in shopify-products.csv product-images.csv photo-fit.json catalog.json merch.json; do
   cp -p "$site/data/$f" "$here/SampleStore/data/$f"
 done
 rsync -a --delete --include='*.jpg' --exclude='*' "$site/prototype/img/" "$here/SampleStore/prototype/img/"
@@ -43,4 +44,4 @@ echo "$note" > "$here/SiteAssets/SOURCE.txt"
 photos="$(ls "$here/SampleStore/prototype/img" | wc -l | tr -d ' ')"
 tiles="$(ls "$here/SiteAssets/tiles" | wc -l | tr -d ' ')"
 echo "$note"
-echo "SampleStore: 4 data files, $photos photos. SiteAssets: $tiles tiles, $(ls "$here/SiteAssets/home" | wc -l | tr -d ' ') home photos."
+echo "SampleStore: 5 data files, $photos photos. SiteAssets: $tiles tiles, $(ls "$here/SiteAssets/home" | wc -l | tr -d ' ') home photos."
