@@ -13,7 +13,7 @@ which tools/sync-sample-store.sh copies in. The home page's rooms show the live 
 
 Needs Python 3 and Node.js.
 """
-import os, subprocess, sys
+import os, shutil, subprocess, sys
 
 here = os.path.dirname(os.path.abspath(__file__))
 repo = os.path.dirname(here)
@@ -22,6 +22,9 @@ if not os.path.isfile(os.path.join(site, 'prototype', 'src.html')):
     sys.exit("The website repo isn't at " + site + ". Clone it next to this folder, or set SITE=/path/to/sos-closet-storefront.")
 if not os.path.isdir(os.path.join(repo, 'SampleStore', 'prototype', 'img')) or not os.path.isdir(os.path.join(repo, 'SiteAssets', 'tiles')):
     sys.exit("The site's photos aren't here yet: run tools/sync-sample-store.sh first.")
+
+if not shutil.which('node'):
+    sys.exit("This needs Node.js, which isn't on this Mac. Ask Sam before installing it (nodejs.org's macOS installer, or a copy in ~/.local that needs no password).")
 
 out = os.path.join(here, 'build')
 work = os.path.join(out, '.work')
