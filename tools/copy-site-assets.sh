@@ -21,7 +21,7 @@ fi
 
 if [ "${CONFIGURATION}" = "Debug" ] && [ "${SOS_STORE}" = "sample" ]; then
   if [ -d "${SRCROOT}/SampleStore" ]; then
-    rsync -a --delete "${SRCROOT}/SampleStore/" "${dest}/SampleStore/"
+    rsync -a --delete --exclude="/test/" "${SRCROOT}/SampleStore/" "${dest}/SampleStore/"
   else
     echo "warning: SampleStore/ is missing, so the sample store is empty. Run tools/sync-sample-store.sh."
   fi

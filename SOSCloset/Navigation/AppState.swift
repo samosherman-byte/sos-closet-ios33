@@ -32,8 +32,12 @@ final class AppState {
     private(set) var direction = 1
     /// The pieces in the bag (the Bag tab's badge, hidden at zero). The bag itself comes with `bag/checkout`.
     var bagCount = 0
+    /// The scroll of the Shop page on screen. Each trip to a page starts a new one (a page opens at its top, or at the
+    /// section it was opened at), so the page leaving keeps its own as it slides away.
+    private(set) var shopScroll: PageScroll
 
     init() {
+        shopScroll = Self.scroll(for: .all, landing: nil)
         #if DEBUG
         // For side-by-side screenshots with the app prototype, whose tab bar shows two pieces in the bag:
         // launch with `-SOSPreviewBagCount 2`. Debug builds only.
@@ -41,7 +45,10 @@ final class AppState {
         let defaults = UserDefaults.standard
         bagCount = defaults.integer(forKey: "SOSPreviewBagCount")
         let places: [String: ShopPlace] = ["all": .all, "women": .women, "men": .men, "jewelry": .jewelry]
-        if let place = defaults.string(forKey: "SOSPreviewPlace").flatMap({ places[$0] }) { self.place = place }
+        if let place = defaults.string(forKey: "SOSPreviewPlace").flatMap({ places[$0] }) {
+            self.place = place
+            shopScroll = Self.scroll(for: place, landing: nil)
+        }
         switch defaults.string(forKey: "SOSPreviewTab") {
         case "shop": tab = .shop
         case "saved": tab = .saved
@@ -56,11 +63,19 @@ final class AppState {
         open(piece.dept.map(ShopPlace.init) ?? .all)
     }
 
-    /// Opens Shop at a place on the map: from Home it's always a move to the right (Home is left of everything).
-    func open(_ next: ShopPlace) {
+    /// Opens Shop at a place on the map, at its top or landing at a section (and a type in it): from Home it's always
+    /// a move to the right (Home is left of everything). A link to a category in a small department's case opens the
+    /// case at its top (phase 1: it narrows with a tag once Search exists, APP-SPEC §2).
+    func open(_ next: ShopPlace, at section: String? = nil, type: String? = nil) {
         let from = tab == .shop ? place.rawValue : -1
         direction = next.rawValue >= from ? 1 : -1
+        shopScroll = Self.scroll(for: next, landing: section.map { ($0, type) })
         place = next
         tab = .shop
+    }
+
+    /// A new page's scroll: the tabs make way from 140pt down on a page with a tile row, 160pt elsewhere (SPEC §3).
+    private static func scroll(for place: ShopPlace, landing: (section: String, type: String?)?) -> PageScroll {
+        PageScroll(threshold: place == .all ? 160 : 140, landing: landing)
     }
 }

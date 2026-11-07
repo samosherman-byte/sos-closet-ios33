@@ -27,7 +27,7 @@ extension HomeContent {
                 id: bag.id, image: image, cm: bag.cm, top: bag.top, bot: bag.bot,
                 designer: soon?.designer ?? "", name: bag.name, sub: soon?.note ?? "",
                 label: soon.map { "\($0.designer) \($0.title), \($0.note)" } ?? bag.name,
-                open: { app.open(.women) }
+                open: { app.open(.women, at: "Handbags") }
             )
         }
     }
@@ -46,7 +46,7 @@ extension HomeContent {
             }
             guard !tiles.isEmpty else { return nil }
             return HomeRoomRow(
-                id: room.collection, name: room.name, place: ShopPlace(room.dept), tiles: tiles,
+                id: room.collection, name: room.name, place: ShopPlace(room.dept), cat: room.cat, tiles: tiles,
                 count: closet.count(dept: room.dept, cat: room.cat)
             )
         }

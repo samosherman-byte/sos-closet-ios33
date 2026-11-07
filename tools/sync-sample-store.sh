@@ -8,7 +8,8 @@
 #                 (data/photo-fit.json), the catalog the tests check the mapping against (data/catalog.json),
 #                 the stand-ins for what the live store keeps in Shopify (data/merch.json: the case's story
 #                 lines and featured piece, and the home page's "Home row" collections), and the prototype's photos (prototype/img/*.jpg), at the same paths as in the site, so the
-#                 import file's photo paths work as they are.
+#                 import file's photo paths work as they are; and for the tests only, what the site's prototype showed
+#                 on each browse page (test/golden/, the site's own golden test files; left out of the app).
 #   SiteAssets/   the photos the app ships: the category cutouts (public/tiles/) and the home page's (public/home/).
 #
 # Both folders are git-ignored: this repo is public, and the photos stay out of it.
@@ -25,10 +26,13 @@ if [ ! -f "$site/SPEC.md" ] || [ ! -d "$site/data" ]; then
 fi
 site="$(cd "$site" && pwd)"
 
-mkdir -p "$here/SampleStore/data" "$here/SampleStore/prototype/img" "$here/SiteAssets/tiles" "$here/SiteAssets/home"
+mkdir -p "$here/SampleStore/data" "$here/SampleStore/test/golden" "$here/SampleStore/prototype/img" "$here/SiteAssets/tiles" "$here/SiteAssets/home"
 
 for f in shopify-products.csv product-images.csv photo-fit.json catalog.json merch.json; do
   cp -p "$site/data/$f" "$here/SampleStore/data/$f"
+done
+for f in scenarios.json prototype.json; do
+  cp -p "$site/test/golden/$f" "$here/SampleStore/test/golden/$f"
 done
 rsync -a --delete --include='*.jpg' --exclude='*' "$site/prototype/img/" "$here/SampleStore/prototype/img/"
 rsync -a --delete "$site/public/tiles/" "$here/SiteAssets/tiles/"
@@ -44,4 +48,4 @@ echo "$note" > "$here/SiteAssets/SOURCE.txt"
 photos="$(ls "$here/SampleStore/prototype/img" | wc -l | tr -d ' ')"
 tiles="$(ls "$here/SiteAssets/tiles" | wc -l | tr -d ' ')"
 echo "$note"
-echo "SampleStore: 5 data files, $photos photos. SiteAssets: $tiles tiles, $(ls "$here/SiteAssets/home" | wc -l | tr -d ' ') home photos."
+echo "SampleStore: 5 data files, 2 golden test files, $photos photos. SiteAssets: $tiles tiles, $(ls "$here/SiteAssets/home" | wc -l | tr -d ' ') home photos."

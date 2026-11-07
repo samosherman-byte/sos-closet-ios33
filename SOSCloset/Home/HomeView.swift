@@ -16,7 +16,7 @@ struct HomeView: View {
             VStack(spacing: 0) {
                 opening(width: width, content: content)
                 ForEach(content.rooms) { room in
-                    RoomRowView(room: room, width: width) { app.open(room.place) }
+                    RoomRowView(room: room, width: width) { app.open(room.place, at: room.cat) }
                         .padding(.top, 64)
                 }
                 ServiceNotes()
@@ -89,6 +89,8 @@ struct HomeRoomRow: Identifiable {
     let id: String
     let name: String
     let place: ShopPlace
+    /// The category its title and View all land at ("/women#clothing").
+    let cat: String
     let tiles: [HomeRoomTile]
     let count: Int
 }

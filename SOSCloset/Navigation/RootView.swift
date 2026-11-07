@@ -10,6 +10,8 @@ struct RootView: View {
     /// The closet, from this build's store: fetched when the app opens and again when it comes back after a minute or
     /// more (APP-SPEC §3.1, Freshness).
     @State private var closet = Closet.forThisBuild()
+    /// The hearted pieces, kept on the phone (APP-SPEC §3.8).
+    @State private var saved = SavedPieces()
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -42,6 +44,7 @@ struct RootView: View {
         .tint(.ink)
         .environment(app)
         .environment(closet)
+        .environment(saved)
         .task { await closet.load() }
         .onChange(of: scenePhase) { _, phase in _ = closet.scenePhaseChanged(to: phase) }
     }
