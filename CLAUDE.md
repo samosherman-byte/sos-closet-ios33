@@ -37,6 +37,7 @@ Sam is not an engineer. Explain every change in plain language, and say exactly 
 
 ## Building and checking
 
+- **Work through Xcode itself** (Apple's Xcode plugin for Claude Code, `xcode@claude-plugins-official`, since November 7): open `SOSCloset.xcodeproj` in Xcode first (the first time, Xcode asks whether to let Claude connect, and Sam clicks Allow), then build, run and test through it, read build errors straight from Xcode, render SwiftUI previews to check a view while writing it, drive the Simulator, and search Apple's documentation for anything iOS 26/27 instead of working from memory. If the plugin's tools aren't there, say so and fall back to `xcodebuild` and `simctl` as below.
 - Before each step's work: `xcodebuild -version` and `xcrun simctl list devices available` to see what's installed.
 - After each step: build, run in the Simulator at a small iPhone and a large one (the smallest and the Pro Max the installed Simulator offers), take screenshots (`xcrun simctl io booted screenshot`), and compare them side by side with the same screen of the app prototype (`prototype/`) at the same size in the Simulator's Safari. Show Sam the pairs and say what differs.
 - Unit tests (Swift Testing) cover the catalog mapping, the photo size standard and the bag; they mirror the site's `app/lib/catalog/catalog.test.ts` and `app/lib/bag/bag.test.ts`. Run them before every merge.
