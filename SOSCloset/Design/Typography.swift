@@ -86,10 +86,34 @@ nonisolated extension TextStyle {
     static let tileLabel = TextStyle(face: .body(.medium), size: 12)
     static let tileLabelNarrow = TextStyle(face: .body(.medium), size: 11)
     /// Card text (SPEC §7): designer, name, price · size.
-    static let cardDesigner = TextStyle(face: .display, size: 13, tracking: 0.16, uppercase: true)
+    /// The designer: 13px on a 17px line, stepping down to fit its card (`PieceCard`'s `FittedDesigner`).
+    static let cardDesigner = TextStyle(face: .display, size: 13, tracking: 0.16, uppercase: true, lineHeight: 17.0 / 13)
     static let cardName = TextStyle(face: .body(.regular), size: 14, lineHeight: 1.4)
+    /// A piece's story line in a small department's case (SPEC §7): 13px on phones, grey.
+    static let cardStory = TextStyle(face: .body(.regular), size: 13, lineHeight: 1.5)
     static let cardPrice = TextStyle(face: .body(.medium), size: 15)
     static let cardSize = TextStyle(face: .body(.regular), size: 13)
+    /// The place line (SPEC §3): the department in the display face, 11.5px .14em; the category and type 14px.
+    static let placeDept = TextStyle(face: .display, size: 11.5, tracking: 0.14, uppercase: true)
+    static let placeWord = TextStyle(face: .body(.regular), size: 14)
+    static let placeWordStrong = TextStyle(face: .body(.medium), size: 14)
+    /// The compact tile row's labels (SPEC §3): 11px, 500; 600 for the section in view.
+    static let compactTileLabel = TextStyle(face: .body(.medium), size: 11)
+    static let compactTileLabelOn = TextStyle(face: .body(.semibold), size: 11)
+    // The directory (SPEC §4, the app prototype's directory).
+    /// Its map: 10.5px, 500, .08em.
+    static let directoryTab = TextStyle(face: .body(.medium), size: 10.5, tracking: 0.08, uppercase: true)
+    /// "All of Women ›": the display face, 13px, .16em.
+    static let directoryAll = TextStyle(face: .display, size: 13, tracking: 0.16, uppercase: true)
+    /// A category's row: 12.5px, 600, .14em.
+    static let directoryRow = TextStyle(face: .body(.semibold), size: 12.5, tracking: 0.14, uppercase: true)
+    /// A type, and the house pages: 15px; All Handbags at 500.
+    static let directoryItem = TextStyle(face: .body(.regular), size: 15)
+    static let directoryItemStrong = TextStyle(face: .body(.medium), size: 15)
+    /// The SOS Closet row: the display face, 12.5px, .16em.
+    static let directoryHouse = TextStyle(face: .display, size: 12.5, tracking: 0.16, uppercase: true)
+    /// The quiet line and Saved's count: 13px.
+    static let directoryQuiet = TextStyle(face: .body(.regular), size: 13)
     /// A button (the site's `.btn`): 14px, 600, .04em.
     static let button = TextStyle(face: .body(.semibold), size: 14, tracking: 0.04)
 
@@ -112,6 +136,14 @@ nonisolated extension TextStyle {
     static let noteLink = TextStyle(face: .body(.regular), size: 16)
     /// The footer's disclosure (SPEC §2): 12px, line height 1.5, muted.
     static let disclosure = TextStyle(face: .body(.regular), size: 12, lineHeight: 1.5)
+}
+
+extension TextStyle {
+    /// The size the font has at a text size (Dynamic Type), for measuring a line before it's drawn.
+    func scaledSize(at dynamicTypeSize: DynamicTypeSize) -> CGFloat {
+        let traits = UITraitCollection(preferredContentSizeCategory: UIContentSizeCategory(dynamicTypeSize))
+        return UIFontMetrics(forTextStyle: relativeTo.uiTextStyle).scaledValue(for: size, compatibleWith: traits)
+    }
 }
 
 extension View {
@@ -143,11 +175,7 @@ private struct TextStyleModifier: ViewModifier {
     }
 
     /// The size the font has at the current text size, so letter spacing and line height grow with it.
-    private var scaledSize: CGFloat {
-        let traits = UITraitCollection(preferredContentSizeCategory: UIContentSizeCategory(dynamicTypeSize))
-        return UIFontMetrics(forTextStyle: style.relativeTo.uiTextStyle)
-            .scaledValue(for: style.size, compatibleWith: traits)
-    }
+    private var scaledSize: CGFloat { style.scaledSize(at: dynamicTypeSize) }
 
     /// CSS sets a line's whole height; SwiftUI adds space between lines, so it's the difference.
     private func lineSpacing(at size: CGFloat) -> CGFloat {
@@ -156,7 +184,7 @@ private struct TextStyleModifier: ViewModifier {
     }
 }
 
-private extension Font.TextStyle {
+extension Font.TextStyle {
     var uiTextStyle: UIFont.TextStyle {
         switch self {
         case .largeTitle: .largeTitle
