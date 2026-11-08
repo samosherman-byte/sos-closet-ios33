@@ -444,15 +444,21 @@ nonisolated struct StorefrontSource: CatalogSource {
 
     // MARK: Sending a query
 
-    /// A GraphQL variable's value.
-    nonisolated enum Variable: Encodable, Sendable {
+    /// A GraphQL variable's value (the cart's mutations send lists and objects: `[{merchandiseId, quantity}]`).
+    nonisolated indirect enum Variable: Encodable, Sendable {
         case string(String)
+        case int(Int)
+        case list([Variable])
+        case object([String: Variable])
         case null
 
         func encode(to encoder: any Encoder) throws {
             var c = encoder.singleValueContainer()
             switch self {
             case .string(let s): try c.encode(s)
+            case .int(let n): try c.encode(n)
+            case .list(let items): try c.encode(items)
+            case .object(let fields): try c.encode(fields)
             case .null: try c.encodeNil()
             }
         }
