@@ -2,6 +2,6 @@
 //   sample  = the site's sample store (its import files and the prototype's photos), no Shopify needed
 //   shopify = Sam's store, through the Storefront API (needs Config/Secrets.xcconfig)
 // Release builds always read Sam's store and leave the sample store out.
-SOS_STORE = sample
+SOS_STORE = shopify
 
 #include? "Secrets.xcconfig"

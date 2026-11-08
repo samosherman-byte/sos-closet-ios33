@@ -254,7 +254,8 @@ struct CheckOutButton: View {
                 }
             }
             .disabled(!bag.canCheckOut || opening)
-            Text(bag.canCheckOut ? "Secure checkout by Shopify" : "Checkout is Shopify’s own page: it opens once the app is connected to the store.")
+            // (Shopify's checkout offers Shop Pay, PayPal and Apple Pay at its top: seen on Sam's store, November 7.)
+            Text(bag.canCheckOut ? "Secure checkout by Shopify, with Apple Pay" : "Checkout is Shopify’s own page: it opens once the app is connected to the store.")
                 .textStyle(.productNote)
                 .foregroundStyle(.muted)
                 .multilineTextAlignment(.center)
