@@ -94,6 +94,9 @@ struct SiteHeader: View {
         }
         .animation(reduceMotion ? .easeOut(duration: 0.2) : .easeOut(duration: 0.32), value: tabsShown)
         .animation(reduceMotion ? .easeOut(duration: 0.2) : .easeOut(duration: 0.32), value: compactOn)
+        // The header is navigation, like the system's own bars: it keeps its size at the largest text sizes, and a
+        // long press on one of its buttons shows it large (the Large Content Viewer).
+        .dynamicTypeSize(...DynamicTypeSize.large)
     }
 
     // MARK: The top row
@@ -102,6 +105,7 @@ struct SiteHeader: View {
         ZStack(alignment: .leading) {
             logo
                 .frame(maxWidth: .infinity)
+                .accessibilityHidden(rowAway)
                 .opacity(rowAway ? 0 : 1)
                 .blur(radius: rowAway && !reduceMotion ? 8 : 0)
                 .animation(.easeOut(duration: 0.3), value: rowAway)
@@ -136,6 +140,9 @@ struct SiteHeader: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(directoryOpen ? "Close the directory" : "Menu")
+        .accessibilityShowsLargeContentViewer {
+            Label(directoryOpen ? "Close" : "Menu", systemImage: directoryOpen ? "xmark" : "line.2.horizontal")
+        }
     }
 
     /// The line stretches out of the key on the glass spring as the Menu icon goes out of focus; the words come into
@@ -183,9 +190,9 @@ struct SiteHeader: View {
                 .opacity(tabsShown ? 1 : 0)
         }
         .allowsHitTesting(tabsShown)
-        .accessibilityHidden(!tabsShown)
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Departments")
+        .accessibilityHidden(!tabsShown)
     }
 
     private func tab(_ place: ShopPlace) -> some View {
@@ -213,6 +220,7 @@ struct SiteHeader: View {
         .buttonStyle(.plain)
         .animation(reduceMotion ? nil : .timingCurve(0.3, 0.8, 0.25, 1, duration: 0.55), value: current)
         .accessibilityAddTraits(on ? [.isSelected] : [])
+        .accessibilityShowsLargeContentViewer { Text(place.label(narrow: false)) }
     }
 
     // MARK: A piece's Back and place line
@@ -325,6 +333,7 @@ struct BackKey: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Back")
+        .accessibilityShowsLargeContentViewer { Label("Back", systemImage: "chevron.left") }
     }
 }
 

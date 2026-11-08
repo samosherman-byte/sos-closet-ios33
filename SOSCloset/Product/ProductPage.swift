@@ -258,6 +258,8 @@ private struct PriceLine: View {
         return line
             .textStyle(.productMarks)
             .foregroundStyle(.muted)
+            // (Spaced capitals: past this size AUTHENTICATED no longer fits a line and would break inside the word.)
+            .dynamicTypeSize(...DynamicTypeSize.accessibility3)
     }
 
     /// The hairline between Pre-owned and its grade: 1pt of `line-strong` as tall as the type's line, .35em in.
@@ -419,6 +421,7 @@ private struct BagRow: View {
                 HStack(spacing: 10) {
                     if let variant, bag.contains(variant: variant.id) {
                         bigButton("In your bag · View Bag", style: .outline) { app.tab = .bag }
+                            .accessibilityLabel("In your bag. View Bag")
                     } else {
                         let busy = variant != nil && bag.adding == variant?.id
                         // (Until a size is picked, the button is the site's disabled one: stone, muted.)
@@ -482,10 +485,12 @@ private struct BagRow: View {
             Text(title)
                 .textStyle(.bigButton)
                 .foregroundStyle(style == .solid ? Color.paper : style == .off ? Color.muted : Color.ink)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
                 .frame(maxWidth: .infinity)
-                .frame(height: 52)
+                .frame(minHeight: 52)
                 .background(style == .solid ? Color.ink : style == .off ? Color.stone : Color.paper)
                 .overlay { Rectangle().strokeBorder(style == .off ? Color.lineStrong : Color.ink, lineWidth: 1) }
                 .contentShape(.rect)
@@ -622,6 +627,8 @@ private struct Fold<Content: View>: View {
 private struct PlusMinus: View {
     let open: Bool
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     var body: some View {
         ZStack {
             Capsule().fill(.ink).frame(width: 14 * 14 / 24, height: 1.8 * 14 / 24)
@@ -629,7 +636,8 @@ private struct PlusMinus: View {
                 .rotationEffect(.degrees(open ? 90 : 0))
                 .scaleEffect(x: 1, y: open ? 0 : 1)
         }
-        .animation(Motion.easeOut(0.35), value: open)
+        // (Reduce Motion: plus to minus at once.)
+        .animation(reduceMotion ? nil : Motion.easeOut(0.35), value: open)
         .accessibilityHidden(true)
     }
 }

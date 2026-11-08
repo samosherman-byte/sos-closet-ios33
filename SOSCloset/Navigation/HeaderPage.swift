@@ -31,10 +31,15 @@ struct PageFrame<Content: View>: View {
             content(width)
                 .frame(width: width)
                 .scrollDisabled(directory.isOpen)
-                .safeAreaBar(edge: .top, spacing: 0) { header(.bar, width: width) }
+                .safeAreaBar(edge: .top, spacing: 0) {
+                    // (VoiceOver reads the header first, top row then the row under it, then the page.)
+                    header(.bar, width: width)
+                        .accessibilitySortPriority(3)
+                }
                 .overlay(alignment: .top) {
                     header(.tabs, width: width)
                         .padding(.top, SiteHeader.rowHeight)
+                        .accessibilitySortPriority(2)
                 }
                 .overlay(alignment: .top) {
                     let insets = geometry.safeAreaInsets

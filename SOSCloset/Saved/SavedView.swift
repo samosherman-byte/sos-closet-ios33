@@ -51,8 +51,10 @@ struct SavedView: View {
                 Text("Continue shopping")
                     .textStyle(.smallButton)
                     .foregroundStyle(.paper)
+                    .multilineTextAlignment(.center)
                     .padding(.horizontal, 28)
-                    .frame(height: 48)
+                    .padding(.vertical, 8)
+                    .frame(minHeight: 48)
                     .background(.ink)
                     .contentShape(.rect)
             }

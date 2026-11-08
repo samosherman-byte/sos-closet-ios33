@@ -43,10 +43,18 @@ struct HomeView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, Layout.gutter(forWidth: width))
                 .padding(.top, 14)
-            HStack(spacing: 12) {
-                shopButton("Shop women", solid: true) { app.open(.women) }
-                shopButton("Shop men", solid: false) { app.open(.men) }
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 12) {
+                    shopButton("Shop women", solid: true) { app.open(.women) }
+                    shopButton("Shop men", solid: false) { app.open(.men) }
+                }
+                // (At the largest text sizes, one above the other.)
+                VStack(spacing: 12) {
+                    shopButton("Shop women", solid: true) { app.open(.women) }
+                    shopButton("Shop men", solid: false) { app.open(.men) }
+                }
             }
+            .padding(.horizontal, Layout.gutter(forWidth: width))
             .padding(.top, 22)
             TurntableView(bags: content.bags, front: Merch.turntable.front, width: width, model: table)
                 .padding(.top, 6)
@@ -62,9 +70,9 @@ struct HomeView: View {
                 .textStyle(.homeButton)
                 .foregroundStyle(solid ? Color.paper : Color.ink)
                 .lineLimit(1)
-                .fixedSize()
+                .minimumScaleFactor(0.7)
                 .padding(.horizontal, 22)
-                .frame(height: 46)
+                .frame(minHeight: 46)
                 .background(solid ? Color.ink : Color.paper)
                 .overlay(Rectangle().strokeBorder(.ink, lineWidth: 1))
                 .contentShape(.rect)
@@ -99,6 +107,8 @@ struct HomeRoomRow: Identifiable {
 struct HomeRoomTile: Identifiable {
     let id: String
     let designer: String
+    /// The piece's name, for VoiceOver (the tile shows the designer and the price).
+    var title = ""
     let price: String
     let url: URL?
     let alt: String
@@ -148,8 +158,7 @@ struct RoomRowView: View {
                     Text(room.name)
                         .textStyle(.roomTitle)
                         .foregroundStyle(.ink)
-                        .lineLimit(1)
-                        .fixedSize()
+                        .fixedSize(horizontal: false, vertical: true)
                     Polyline(box: CGSize(width: 7, height: 12), points: [(1, 1), (6, 6), (1, 11)])
                         .stroke(.muted, style: StrokeStyle(lineWidth: 1.2, lineCap: .round, lineJoin: .round))
                         .frame(width: 7, height: 12)
@@ -160,6 +169,7 @@ struct RoomRowView: View {
             .buttonStyle(.plain)
             .accessibilityAddTraits(.isHeader)
             Rectangle().fill(.line).frame(height: 1).frame(minWidth: 24)
+                .layoutPriority(-1)
         }
         .padding(.leading, Layout.gutter(forWidth: width))
     }
@@ -190,9 +200,7 @@ struct RoomRowView: View {
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(p.designer), \(p.price)")
-        .accessibilityAddTraits(.isLink)
+        .accessibilityLabel([p.designer, p.title, p.price].filter { !$0.isEmpty }.joined(separator: ", "))
     }
 
     /// The row ends on View all: a thin ink ring (34% of the tile, 60% down) with a chevron, and a credit like a piece's.
@@ -254,7 +262,7 @@ struct ServiceNotes: View {
             note("Ask SOS Closet", "Questions about a piece, its sizing or its details? Write to us.",
                  link: Self.email, url: URL(string: "mailto:\(Self.email)")!)
             note("Follow SOS Closet", "See new pieces as they come in on Instagram.",
-                 link: Self.instagramHandle, url: Self.instagram)
+                 link: Self.instagramHandle, url: Self.instagram, spoken: "SOS Closet on Instagram")
             note("Consign with us", "We photograph, price, list and ship your pieces for you.",
                  link: "Start a consignment", url: URL(string: "mailto:\(Self.email)?subject=Consignment")!)
             Text("Pieces are pre-owned unless marked New with tags. SOS Closet is independent and is not affiliated with, authorized by or endorsed by any brand it sells. All trademarks belong to their owners.")
@@ -270,7 +278,7 @@ struct ServiceNotes: View {
         .overlay(alignment: .top) { Rectangle().fill(.line).frame(height: 1) }
     }
 
-    private func note(_ title: String, _ words: String, link: String, url: URL) -> some View {
+    private func note(_ title: String, _ words: String, link: String, url: URL, spoken: String? = nil) -> some View {
         VStack(spacing: 10) {
             Text(title)
                 .textStyle(.noteTitle)
@@ -287,6 +295,8 @@ struct ServiceNotes: View {
                     .underline()
                     .padding(.vertical, 10)
             }
+            // (A handle like @SOSCLOSET33 would be spelled out letter by letter.)
+            .accessibilityLabel(spoken ?? link)
         }
         .multilineTextAlignment(.center)
     }
