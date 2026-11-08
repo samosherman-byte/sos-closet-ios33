@@ -16,20 +16,34 @@ struct PieceCard: View {
     var story = false
     /// The piece leading a case on a row of its own: its words keep the margin on both sides.
     var lead = false
-    let open: () -> Void
 
+    @Environment(AppState.self) private var app
     @Environment(SavedPieces.self) private var saved
     @Environment(\.displayScale) private var displayScale
+    @Environment(\.pieceZoom) private var zoom
+    @Environment(\.zoomContext) private var context
     @State private var near = false
+    /// The photo the card is showing: its piece's page opens on it (SPEC §5).
+    @State private var photo = 0
+
+    /// The card's photo, which its piece's page zooms out of (unique on the page: the same piece can have a card in a
+    /// department and in a piece's "You may also like").
+    private var zoomID: String { context + "|" + piece.id }
 
     private var sizeLine: String { sizeWords(piece.sizes, range: true) }
     private var price: String { moneyText(piece.price) }
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            Button(action: open) {
+            Button {
+                app.open(piece, photo: photo, zoomID: zoomID)
+            } label: {
                 VStack(alignment: .leading, spacing: 0) {
-                    CardPhotos(piece: piece, width: width, tileHeight: tileHeight, factor: factor, near: near)
+                    CardPhotos(
+                        piece: piece, width: width, tileHeight: tileHeight, factor: factor, near: near, zoomID: zoomID,
+                        at: $photo
+                    )
+                    .zoomSource(zoomID, in: zoom)
                     words
                 }
                 .contentShape(.rect)
@@ -148,11 +162,15 @@ private struct CardPhotos: View {
     let tileHeight: CGFloat
     let factor: Double
     let near: Bool
+    let zoomID: String
+    /// The photo in view.
+    @Binding var at: Int
 
+    @Environment(AppState.self) private var app
     @Environment(\.cardPressed) private var pressed
     @Environment(\.displayScale) private var displayScale
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var at = 0
+    @State private var track = ScrollPosition(idType: Int.self)
     @State private var sliding = false
     @State private var settle: Task<Void, Never>?
 
@@ -180,12 +198,23 @@ private struct CardPhotos: View {
                             slide(k, photo)
                                 .frame(width: width, height: tileHeight)
                                 .clipped()
+                                .id(k)
                         }
                     }
                     .scrollTargetLayout()
                 }
                 .scrollIndicators(.hidden)
                 .scrollTargetBehavior(.paging)
+                .scrollPosition($track)
+                // Coming back from its piece's page, the card turns to the photo the page was showing, so the page
+                // zooms back into that photo (SPEC §5).
+                .onChange(of: app.turnBack) { _, back in
+                    guard let back, back.zoomID == zoomID, back.photo != at, list.indices.contains(back.photo) else { return }
+                    var now = Transaction()
+                    now.disablesAnimations = true
+                    withTransaction(now) { track.scrollTo(id: back.photo) }
+                    at = back.photo
+                }
                 .onScrollGeometryChange(for: Int.self) { g in
                     Int((g.contentOffset.x / max(1, g.containerSize.width)).rounded())
                 } action: { _, k in
@@ -272,6 +301,30 @@ private struct CardPhotos: View {
             settle = Task {
                 try? await Task.sleep(for: .milliseconds(1200))
                 if !Task.isCancelled { sliding = false }
+            }
+        }
+    }
+}
+
+// MARK: - Rows of cards
+
+/// Pieces two across, edge to edge (3pt between), rows 32pt apart; the cards of a row share one tile height (SPEC §7).
+struct PieceGrid: View {
+    let pieces: [Piece]
+    /// The page's width.
+    let width: CGFloat
+
+    var body: some View {
+        let card = (width - 3) / 2
+        let factor = CardPhotoFit.factor(forWindowWidth: width)
+        VStack(alignment: .leading, spacing: 32) {
+            ForEach(Browse.rows(pieces), id: \.first!.id) { row in
+                let tile = CardPhotoFit.rowTileHeight(row, width: card, factor: factor)
+                HStack(alignment: .top, spacing: 3) {
+                    ForEach(row) { piece in
+                        PieceCard(piece: piece, width: card, tileHeight: tile, factor: factor)
+                    }
+                }
             }
         }
     }

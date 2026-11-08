@@ -16,6 +16,8 @@ struct PageFrame<Content: View>: View {
     var placeHasSections = true
     /// A page with a tile row: its compact copy, for the way back up.
     var compact: CompactTiles? = nil
+    /// A piece's page: its Back and place line in the tab row's place (SPEC §10).
+    var piece: PieceTop? = nil
     @ViewBuilder var content: (_ width: CGFloat) -> Content
 
     @Environment(AppState.self) private var app
@@ -38,7 +40,8 @@ struct PageFrame<Content: View>: View {
                     let insets = geometry.safeAreaInsets
                     let screen = geometry.size.height + insets.top + insets.bottom
                     DirectoryLayer(
-                        state: directory, page: current, section: scroll.section, type: scroll.type,
+                        state: directory, page: current ?? piece?.place, section: piece?.section ?? scroll.section,
+                        type: piece == nil ? scroll.type : "",
                         maxHeight: screen - max(120, 0.16 * screen) - (insets.top + SiteHeader.rowHeight + 4),
                         choose: choose
                     )
@@ -67,6 +70,7 @@ struct PageFrame<Content: View>: View {
             rollFrom: scroll.rollFrom,
             compact: compact,
             compactCurrent: scroll.section,
+            piece: piece,
             directoryOpen: directory.isOpen,
             onMenu: { directory.isOpen ? directory.close() : directory.open(fromLine: false) },
             onPlace: { directory.open(fromLine: true) },
@@ -91,7 +95,8 @@ struct PageFrame<Content: View>: View {
         directory.close()
         switch choice {
         case .place(let place, let section, let type):
-            if place == current {
+            // (From a piece's page every place is a trip: it goes back to Shop, at that place.)
+            if place == current && piece == nil {
                 Task {
                     try? await Task.sleep(for: .milliseconds(30))
                     if let section {
@@ -107,6 +112,7 @@ struct PageFrame<Content: View>: View {
             app.tab = .saved
         case .home:
             app.tab = .home
+            app.homePath = []
         case .link(let url):
             openURL(url)
         }

@@ -41,7 +41,7 @@ extension HomeContent {
                     id: piece.id, designer: piece.designer, price: priceText(piece.price),
                     url: sizedImageURL(photo.url, width: 600), alt: photo.alt,
                     width: photo.fit.width, left: photo.fit.left, top: photo.fit.top, grow: photo.fit.grow,
-                    open: { app.open(piece) }
+                    open: { app.open(piece, zoomID: HomeRoomTile.zoomID(piece.id)) }
                 )
             }
             guard !tiles.isEmpty else { return nil }
@@ -64,6 +64,11 @@ extension HomeContent {
         let tall = image.width.flatMap { w in image.height.map { Double($0) / Double(max(1, w)) } } ?? 1.25
         return (image.url, image.alt, fit ?? HomeFit(width: w, left: (100 - w) / 2, top: Merch.homeStandard.foot * 100 - w * tall, grow: 1))
     }
+}
+
+extension HomeRoomTile {
+    /// The room tile's photo, which its piece's page zooms out of.
+    static func zoomID(_ id: String) -> String { "home|" + id }
 }
 
 extension ShopPlace {

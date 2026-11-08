@@ -115,6 +115,8 @@ struct RoomRowView: View {
     let width: CGFloat
     let openRoom: () -> Void
 
+    @Environment(\.pieceZoom) private var zoom
+
     /// Two tiles and about a third of the next in view: `(width − 32 − 24) / 2.3`, 12pt apart.
     private var tile: CGFloat { ((width - 2 * Layout.gutter(forWidth: width) - 24) / 2.3).rounded(.down) }
     /// Phones (under 761pt wide) grow clothing by its g about the middle of its foot.
@@ -181,6 +183,7 @@ struct RoomRowView: View {
                 .frame(width: tile, height: tile)
                 .background(.paper)
                 .clipped()
+                .zoomSource(HomeRoomTile.zoomID(p.id), in: zoom)
                 credit(p.designer, p.price)
             }
             .frame(width: tile)

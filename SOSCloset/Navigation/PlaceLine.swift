@@ -21,6 +21,9 @@ struct PlaceLine: View {
     let rollFrom: Edge
     /// The room the words have: the line's widest (the screen less its margins) less its padding and the chevron.
     let room: CGFloat
+    /// On a piece's page at rest the line sits flat on the page (white, only the glass's hairline rim; SPEC §10, "Flat
+    /// at rest"); it turns to glass as it floats up into the top row.
+    var flat = false
     let action: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -64,7 +67,7 @@ struct PlaceLine: View {
             .padding(.leading, 16)
             .padding(.trailing, 7)
             .frame(height: 42)
-            .glassEffect(.regular.interactive(), in: .capsule)
+            .flatOrGlass(flat, in: .capsule)
             .contentShape(.capsule)
         }
         .buttonStyle(PressChevron())
@@ -73,11 +76,25 @@ struct PlaceLine: View {
     }
 }
 
-/// The thin slanted hairline between the words (1 × 14pt, `line-strong`, 18°), 10pt either side.
+extension View {
+    /// A control of the floating navigation, flat on the page (`flat`: white with the glass's hairline rim and edge,
+    /// no shadow, so the white around it runs into the photo's white; SPEC §10) or in Liquid Glass over it.
+    func flatOrGlass(_ flat: Bool, in shape: some Shape) -> some View {
+        background {
+            shape.fill(.paper)
+                .overlay { shape.stroke(Color.ink.opacity(0.16), lineWidth: 0.75) }
+                .opacity(flat ? 1 : 0)
+        }
+        .glassEffect(flat ? .identity : .regular.interactive(), in: shape)
+    }
+}
+
+/// The thin slanted hairline between the words (1 × 14pt, `line-strong`, 18°), 10pt either side. Drawn as ink at 22%,
+/// which is `line-strong` on white, so it stays as visible over the glass when darker photos pass behind it.
 private struct Slash: View {
     var body: some View {
         Rectangle()
-            .fill(.lineStrong)
+            .fill(Color.ink.opacity(0.22))
             .frame(width: 1, height: 14)
             .rotationEffect(.degrees(18))
             .padding(.horizontal, 10)

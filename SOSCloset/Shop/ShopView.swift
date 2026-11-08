@@ -124,16 +124,7 @@ private struct ShopPage: View {
 
     /// Rows of two, 32pt apart; the cards of a row share one tile height.
     private func grid(_ pieces: [Piece]) -> some View {
-        VStack(alignment: .leading, spacing: 32) {
-            ForEach(Browse.rows(pieces), id: \.first!.id) { row in
-                let tile = CardPhotoFit.rowTileHeight(row, width: cardWidth, factor: factor)
-                HStack(alignment: .top, spacing: 3) {
-                    ForEach(row) { piece in
-                        PieceCard(piece: piece, width: cardWidth, tileHeight: tile, factor: factor) { app.open(piece) }
-                    }
-                }
-            }
-        }
+        PieceGrid(pieces: pieces, width: width)
     }
 
     // MARK: The case
@@ -145,16 +136,13 @@ private struct ShopPage: View {
         let (lead, rows) = Browse.caseLayout(pieces)
         return VStack(alignment: .leading, spacing: 40) {
             if let lead {
-                PieceCard(piece: lead, width: width, tileHeight: width * 1.25, factor: factor, story: true, lead: true) {
-                    app.open(lead)
-                }
+                PieceCard(piece: lead, width: width, tileHeight: width * 1.25, factor: factor, story: true, lead: true)
             }
             ForEach(rows, id: \.first!.id) { row in
                 HStack(alignment: .top, spacing: 3) {
                     ForEach(row) { piece in
                         PieceCard(
-                            piece: piece, width: cardWidth, tileHeight: cardWidth * 1.25, factor: factor, story: true
-                        ) { app.open(piece) }
+                            piece: piece, width: cardWidth, tileHeight: cardWidth * 1.25, factor: factor, story: true)
                     }
                 }
             }
@@ -182,7 +170,7 @@ private struct ShopPage: View {
 
 /// A section heading (SPEC §7): the display face, uppercase, letter-spaced, 15pt, with a hairline running to the
 /// right; not sticky. On Shop All a department's heading is the way in, with a small chevron.
-private struct SectionHeading: View {
+struct SectionHeading: View {
     let name: String
     let opens: (() -> Void)?
 

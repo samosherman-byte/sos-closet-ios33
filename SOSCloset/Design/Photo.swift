@@ -16,6 +16,9 @@ final class PhotoLoader {
         return cache
     }()
     private var running: [String: Task<UIImage?, Never>] = [:]
+    /// The last key decoded for each photo, whatever its size: a page opening on a photo a card has just drawn shows the
+    /// card's copy until its own is in.
+    private var lastKey: [String: String] = [:]
     private let session: URLSession = {
         let config = URLSessionConfiguration.default
         config.urlCache = URLCache(memoryCapacity: 32 << 20, diskCapacity: 256 << 20)
@@ -28,6 +31,19 @@ final class PhotoLoader {
     }
 
     func cached(_ url: URL, maxPixels: Int? = nil) -> UIImage? { memory.object(forKey: Self.key(url, maxPixels) as NSString) }
+
+    /// Any copy of this photo already decoded, at whatever size (Shopify's image service gives the same photo at each
+    /// width).
+    func anyCached(_ url: URL) -> UIImage? {
+        lastKey[Self.base(url)].flatMap { memory.object(forKey: $0 as NSString) }
+    }
+
+    private static func base(_ url: URL) -> String {
+        guard var parts = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return url.absoluteString }
+        parts.queryItems = parts.queryItems?.filter { $0.name != "width" }
+        if parts.queryItems?.isEmpty == true { parts.queryItems = nil }
+        return parts.string ?? url.absoluteString
+    }
 
     /// The photo, decoded no larger than `maxPixels` on its longer side (nil: as it is).
     func image(_ url: URL, maxPixels: Int? = nil) async -> UIImage? {
@@ -53,6 +69,7 @@ final class PhotoLoader {
         if let image {
             let cost = Int(image.size.width * image.scale * image.size.height * image.scale * 4)
             memory.setObject(image, forKey: key as NSString, cost: cost)
+            lastKey[Self.base(url)] = key
         }
         return image
     }
@@ -86,19 +103,27 @@ struct LoadedPhoto<Content: View>: View {
     let url: URL?
     var maxPixels: Int? = nil
     var active = true
+    /// Until this size is in, show any copy of the photo already decoded (a card's, as its piece's page opens).
+    var standIn = false
     @ViewBuilder var content: (UIImage) -> Content
 
     @State private var image: UIImage?
 
     var body: some View {
+        // (What's in the loader's cache shows on the first frame, before the task runs.)
+        let shown = image ?? (active ? url.flatMap(quick) : nil)
         ZStack {
-            if let image { content(image) }
+            if let shown { content(shown) }
         }
         .task(id: Load(url: url, active: active)) {
             guard let url, active else { image = nil; return }
             if let hit = PhotoLoader.shared.cached(url, maxPixels: maxPixels) { image = hit; return }
             image = await PhotoLoader.shared.image(url, maxPixels: maxPixels)
         }
+    }
+
+    private func quick(_ url: URL) -> UIImage? {
+        PhotoLoader.shared.cached(url, maxPixels: maxPixels) ?? (standIn ? PhotoLoader.shared.anyCached(url) : nil)
     }
 
     private struct Load: Equatable {
