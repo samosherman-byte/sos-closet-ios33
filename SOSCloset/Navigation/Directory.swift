@@ -69,13 +69,18 @@ struct DirectoryLayer: View {
                     .ignoresSafeArea(edges: .bottom)
                     .contentShape(.rect)
                     .onTapGesture { state.close() }
-                    .accessibilityLabel("Close the directory")
-                    .accessibilityAddTraits(.isButton)
+                    // (VoiceOver closes it with the panel's own Close, or the escape gesture.)
+                    .accessibilityHidden(true)
                     .transition(.opacity)
                 DirectoryPanel(
                     state: state, page: page, section: section, type: type,
                     maxHeight: max(240, maxHeight), choose: choose
                 )
+                // (A panel of short rows: it grows with the text up to the largest standard size.)
+                .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                // While it's open, VoiceOver stays in it; the two-finger scrub closes it.
+                .accessibilityAddTraits(.isModal)
+                .accessibilityAction(.escape) { state.close() }
                 .padding(.horizontal, 8)
                 .padding(.top, 4)
                 .transition(panelTransition)
@@ -172,6 +177,8 @@ private struct DirectoryPanel: View {
                 } label: {
                     Text(place.label(narrow: false))
                         .textStyle(.directoryTab)
+                        // (The map, like the tab row it copies, keeps its size.)
+                        .dynamicTypeSize(...DynamicTypeSize.large)
                         .foregroundStyle(.ink)
                         .lineLimit(1)
                         .fixedSize()
@@ -294,6 +301,7 @@ private struct DirectoryPanel: View {
             }
             .buttonStyle(.plain)
             .accessibilityValue(folds ? (open ? "Expanded" : "Collapsed") : "")
+            .accessibilityAddTraits(here ? [.isSelected] : [])
             if open {
                 VStack(alignment: .leading, spacing: 0) {
                     item("All \(row.name)", strong: true, underlined: false) {
@@ -322,6 +330,7 @@ private struct DirectoryPanel: View {
                 .contentShape(.rect)
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(underlined ? [.isSelected] : [])
     }
 
     // MARK: The house
@@ -439,6 +448,7 @@ private struct DirectoryPanel: View {
             )
             .accessibilityLabel("Close the directory")
             .accessibilityAddTraits(.isButton)
+            .accessibilityAction { state.close() }
             .accessibilityAction { state.close() }
     }
 }

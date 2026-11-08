@@ -342,6 +342,8 @@ struct TurntableView: View {
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
+        // (Between the two arrows on one line: it grows only so far.)
+        .dynamicTypeSize(...DynamicTypeSize.xxLarge)
         .accessibilityLabel(bag.label)
     }
 

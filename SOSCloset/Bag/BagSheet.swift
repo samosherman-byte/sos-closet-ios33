@@ -55,7 +55,8 @@ struct BagSheet: View {
                                 .textStyle(.cardSize)
                                 .foregroundStyle(.muted)
                         }
-                        Text(moneyText(line?.price ?? piece?.price ?? 0))
+                        // (The bag's figures have their cents, here as on the Bag tab.)
+                        Text(centsText(line?.price ?? piece?.price ?? 0))
                             .textStyle(.cardPrice)
                             .foregroundStyle(.ink)
                             .monospacedDigit()
@@ -67,10 +68,12 @@ struct BagSheet: View {
                 HStack(alignment: .firstTextBaseline) {
                     Text("Subtotal · \(plural(contents.lines.count, "piece"))").textStyle(.bagSubtotal)
                     Spacer(minLength: 12)
-                    Text(centsText(contents.subtotal)).textStyle(.bagSubtotalAmount).monospacedDigit()
+                    // (An amount never breaks across lines; the words beside it wrap instead.)
+                    Text(centsText(contents.subtotal)).textStyle(.bagSubtotalAmount).monospacedDigit().fixedSize()
                 }
                 .foregroundStyle(.ink)
-                .accessibilityElement(children: .combine)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Subtotal, \(plural(contents.lines.count, "piece")): \(centsText(contents.subtotal))")
                 .padding(.top, 14)
                 .hairlineAbove()
                 .padding(.top, 18)

@@ -177,11 +177,11 @@ struct SectionHeading: View {
     var body: some View {
         let words = HStack(spacing: 18) {
             HStack(spacing: 6) {
+                // (One line at the usual text sizes; at the largest it wraps rather than push the page wider.)
                 Text(name)
                     .textStyle(.categoryHeading)
                     .foregroundStyle(.ink)
-                    .lineLimit(1)
-                    .fixedSize()
+                    .fixedSize(horizontal: false, vertical: true)
                 if opens != nil {
                     Polyline(box: CGSize(width: 7, height: 12), points: [(1, 1), (6, 6), (1, 11)])
                         .stroke(.muted, style: StrokeStyle(lineWidth: 1.2, lineCap: .round, lineJoin: .round))
@@ -189,6 +189,7 @@ struct SectionHeading: View {
                 }
             }
             Rectangle().fill(.line).frame(height: 1).frame(minWidth: 24)
+                .layoutPriority(-1)
         }
         .frame(minHeight: 44)
         .padding(.horizontal, 16)

@@ -81,7 +81,8 @@ private struct BagPage: View {
                 HStack(alignment: .firstTextBaseline) {
                     Text("Subtotal").textStyle(.bagSubtotal)
                     Spacer(minLength: 12)
-                    Text(centsText(contents.subtotal)).textStyle(.bagSubtotalAmount).monospacedDigit()
+                    // (An amount never breaks across lines; the words beside it wrap instead.)
+                    Text(centsText(contents.subtotal)).textStyle(.bagSubtotalAmount).monospacedDigit().fixedSize()
                 }
                 .foregroundStyle(.ink)
                 .accessibilityElement(children: .combine)
@@ -92,7 +93,8 @@ private struct BagPage: View {
                 }
                 .textStyle(.bagRow)
                 .foregroundStyle(.ink2)
-                .accessibilityElement(children: .combine)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Shipping: $12 standard, $35 express")
                 Text("Shipping and tax are added at checkout. Returns within 14 days.")
                     .textStyle(.productNote)
                     .foregroundStyle(.muted)
@@ -122,8 +124,10 @@ private struct BagPage: View {
                 Text("Continue shopping")
                     .textStyle(.smallButton)
                     .foregroundStyle(.paper)
+                    .multilineTextAlignment(.center)
                     .padding(.horizontal, 28)
-                    .frame(height: 48)
+                    .padding(.vertical, 8)
+                    .frame(minHeight: 48)
                     .background(.ink)
                     .contentShape(.rect)
             }
@@ -161,29 +165,32 @@ private struct BagLineRow: View {
             .allowsHitTesting(piece != nil)
             .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 4) {
-                Text(piece?.designer ?? line.designer)
-                    .textStyle(.cardDesigner)
-                    .foregroundStyle(.ink)
-                Text(piece?.title ?? line.title)
-                    .textStyle(.cardName)
-                    .foregroundStyle(.ink2)
-                    .fixedSize(horizontal: false, vertical: true)
-                if let size = line.size {
-                    Text("Size \(size)")
-                        .textStyle(.cardSize)
-                        .foregroundStyle(.muted)
-                }
-                if !line.available {
-                    Text("This piece has sold since you added it.")
-                        .textStyle(.productNote)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(piece?.designer ?? line.designer)
+                        .textStyle(.cardDesigner)
+                        .foregroundStyle(.ink)
+                    Text(piece?.title ?? line.title)
+                        .textStyle(.cardName)
                         .foregroundStyle(.ink2)
                         .fixedSize(horizontal: false, vertical: true)
+                    if let size = line.size {
+                        Text("Size \(size)")
+                            .textStyle(.cardSize)
+                            .foregroundStyle(.muted)
+                    }
+                    if !line.available {
+                        Text("This piece has sold since you added it.")
+                            .textStyle(.productNote)
+                            .foregroundStyle(.ink2)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Text(line.available ? centsText(line.price) : "Sold")
+                        .textStyle(.cardPrice)
+                        .foregroundStyle(.ink)
+                        .monospacedDigit()
+                        .padding(.top, 2)
                 }
-                Text(line.available ? centsText(line.price) : "Sold")
-                    .textStyle(.cardPrice)
-                    .foregroundStyle(.ink)
-                    .monospacedDigit()
-                    .padding(.top, 2)
+                .accessibilityElement(children: .combine)
                 Spacer(minLength: 0)
                 Button(action: remove) {
                     Text("Remove")
@@ -276,10 +283,12 @@ struct SquareButton: View {
             Text(title)
                 .textStyle(.bigButton)
                 .foregroundStyle(look == .solid ? Color.paper : look == .off ? Color.muted : Color.ink)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
                 .frame(maxWidth: .infinity)
-                .frame(height: 52)
+                .frame(minHeight: 52)
                 .background(look == .solid ? Color.ink : look == .off ? Color.stone : Color.paper)
                 .overlay { Rectangle().strokeBorder(look == .off ? Color.lineStrong : Color.ink, lineWidth: 1) }
                 .contentShape(.rect)

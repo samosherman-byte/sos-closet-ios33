@@ -49,10 +49,14 @@ nonisolated struct TextStyle: Hashable, Sendable {
     var uppercase = false
     /// Line height as a multiple of the size, as the site's CSS writes it (`line-height: 1.65`); nil keeps the font's own.
     var lineHeight: CGFloat? = nil
+    /// The Dynamic Type style it grows with, when it isn't the nearest one (a line stepped down to fit keeps growing
+    /// as its full size does, so the fit still holds at every text size).
+    var growsWith: Font.TextStyle? = nil
 
     /// The Dynamic Type style it grows with: the one whose default size is nearest.
     var relativeTo: Font.TextStyle {
-        switch size {
+        if let growsWith { return growsWith }
+        return switch size {
         case ..<11.5: .caption2
         case ..<12.5: .caption
         case ..<13.5: .footnote

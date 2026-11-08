@@ -3,7 +3,7 @@ import SwiftUI
 // Opening a piece (APP-SPEC §3.6, §4; SPEC §5): the piece you tapped becomes the page. The app uses the system's zoom
 // transition, from the card's photo into the product page, and back by Back, the edge swipe or pulling the page down:
 // one decelerating move, interactive (the page can be grabbed mid-move), and the page you came from is kept exactly as
-// it was. Reduce Motion: no zoom.
+// it was. Reduce Motion: no zoom, the system's push.
 
 extension EnvironmentValues {
     /// The namespace the cards of this tab's stack zoom out of (nil outside a stack that opens pieces).
@@ -41,13 +41,12 @@ private struct PieceDestinations: ViewModifier {
             }
     }
 
-    /// Zooming out of the card that was tapped; with no card, or with Reduce Motion, the system's own push (a
-    /// cross-fade on iOS 27 with Reduce Motion).
+    /// Zooming out of the card that was tapped; with no card, or with Reduce Motion, the system's own push (APP-SPEC
+    /// §4 allows a plain push or a fade; checked on November 7: asked for a cross-fade, iOS 27 still pushes with
+    /// Reduce Motion on, so the app simply leaves it the system's push).
     @ViewBuilder private func transition(_ page: some View, _ route: PieceRoute) -> some View {
         if let id = route.zoomID, !reduceMotion {
             page.navigationTransition(.zoom(sourceID: id, in: zoom))
-        } else if reduceMotion, #available(iOS 27, *) {
-            page.navigationTransition(.crossFade)
         } else {
             page
         }

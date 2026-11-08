@@ -38,7 +38,7 @@ extension HomeContent {
             let tiles: [HomeRoomTile] = (closet.rooms[room.collection] ?? []).compactMap { pick in
                 guard let piece = closet.piece(handle: pick.handle), let photo = homePhoto(piece, fit: pick.fit) else { return nil }
                 return HomeRoomTile(
-                    id: piece.id, designer: piece.designer, price: priceText(piece.price),
+                    id: piece.id, designer: piece.designer, title: piece.title, price: priceText(piece.price),
                     url: sizedImageURL(photo.url, width: 600), alt: photo.alt,
                     width: photo.fit.width, left: photo.fit.left, top: photo.fit.top, grow: photo.fit.grow,
                     open: { app.open(piece, zoomID: HomeRoomTile.zoomID(piece.id)) }

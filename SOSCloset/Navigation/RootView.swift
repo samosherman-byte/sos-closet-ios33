@@ -15,6 +15,7 @@ struct RootView: View {
     /// The bag: Sam's store's cart, or the sample store's list (APP-SPEC §3.7).
     @State private var bag = Bag.forThisBuild()
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         @Bindable var app = app
@@ -40,8 +41,8 @@ struct RootView: View {
             } label: {
                 tabLabel("Bag", symbol: "bag", for: .bag)
             }
+            // (The badge gives VoiceOver the count: "Bag, 2 items".)
             .badge(bag.count)
-            .accessibilityLabel(bag.count == 0 ? "Bag" : "Bag, \(bag.count) \(bag.count == 1 ? "piece" : "pieces")")
         }
         .tabBarMinimizeBehavior(.onScrollDown)
         .tint(.ink)
@@ -49,7 +50,8 @@ struct RootView: View {
         // down to close (APP-SPEC §3.7, §4). Checkout opens over it, or over the Bag tab.
         .sheet(item: $bag.sheet) { added in
             BagSheet(added: added)
-                .presentationDetents([.medium, .large])
+                // (At the largest text sizes half a screen holds little more than the piece: it opens full height.)
+                .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.medium, .large])
                 .presentationDragIndicator(.visible)
                 // A panel: the thicker system material (APP-SPEC §4), so what's behind it shows as a soft blur, not
                 // its colors.

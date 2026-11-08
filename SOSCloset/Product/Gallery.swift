@@ -83,6 +83,8 @@ struct ProductGallery: View {
                     .textStyle(.photoCounter)
                     .foregroundStyle(.ink2)
                     .monospacedDigit()
+                    // (It sits on the photo's corner: it grows only so far.)
+                    .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                     .padding(.trailing, 16)
                     .padding(.bottom, 14)
                     .allowsHitTesting(false)

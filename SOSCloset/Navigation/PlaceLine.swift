@@ -72,20 +72,39 @@ struct PlaceLine: View {
         }
         .buttonStyle(PressChevron())
         .accessibilityLabel(words.label)
+        .accessibilityShowsLargeContentViewer {
+            Text([words.dept, words.section, words.type].filter { !$0.isEmpty }.joined(separator: " / "))
+        }
         .animation(reduceMotion ? nil : Motion.easeOut(0.42), value: words)
     }
 }
 
 extension View {
     /// A control of the floating navigation, flat on the page (`flat`: white with the glass's hairline rim and edge,
-    /// no shadow, so the white around it runs into the photo's white; SPEC §10) or in Liquid Glass over it.
-    func flatOrGlass(_ flat: Bool, in shape: some Shape) -> some View {
-        background {
-            shape.fill(.paper)
-                .overlay { shape.stroke(Color.ink.opacity(0.16), lineWidth: 0.75) }
-                .opacity(flat ? 1 : 0)
-        }
-        .glassEffect(flat ? .identity : .regular.interactive(), in: shape)
+    /// no shadow, so the white around it runs into the photo's white; SPEC §10) or in Liquid Glass over it. With
+    /// Increase Contrast the flat rim is a solid ink line (APP-SPEC §6); the glass adapts by itself.
+    func flatOrGlass<S: Shape>(_ flat: Bool, in shape: S) -> some View {
+        modifier(FlatOrGlass(flat: flat, shape: shape))
+    }
+}
+
+private struct FlatOrGlass<S: Shape>: ViewModifier {
+    let flat: Bool
+    let shape: S
+
+    @Environment(\.colorSchemeContrast) private var contrast
+
+    func body(content: Content) -> some View {
+        let strong = contrast == .increased
+        content
+            .background {
+                shape.fill(.paper)
+                    .overlay {
+                        shape.stroke(strong ? Color.ink : Color.ink.opacity(0.16), lineWidth: strong ? 1 : 0.75)
+                    }
+                    .opacity(flat ? 1 : 0)
+            }
+            .glassEffect(flat ? .identity : .regular.interactive(), in: shape)
     }
 }
 

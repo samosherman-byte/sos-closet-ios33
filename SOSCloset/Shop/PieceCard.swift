@@ -22,6 +22,7 @@ struct PieceCard: View {
     @Environment(\.displayScale) private var displayScale
     @Environment(\.pieceZoom) private var zoom
     @Environment(\.zoomContext) private var context
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var near = false
     /// The photo the card is showing: its piece's page opens on it (SPEC §5).
     @State private var photo = 0
@@ -49,11 +50,13 @@ struct PieceCard: View {
                 .contentShape(.rect)
             }
             .buttonStyle(CardPress())
-            .accessibilityElement(children: .ignore)
+            // (The button itself carries the words, so VoiceOver hears one button: designer, name, price, size.)
             .accessibilityLabel([piece.designer, piece.title, price, sizeLine].filter { !$0.isEmpty }.joined(separator: ", "))
             .accessibilityHint(story ? (piece.story ?? "") : "")
+            .accessibilitySortPriority(1)
             heart
         }
+        .accessibilityElement(children: .contain)
         .frame(width: width, alignment: .topLeading)
         // Photos load as their card comes within about a screen of the view, and are let go far away from it (the
         // loader keeps them for coming back).
@@ -76,7 +79,7 @@ struct PieceCard: View {
             Text(piece.title)
                 .textStyle(.cardName)
                 .foregroundStyle(.ink2)
-                .lineLimit(story ? nil : 2)
+                .lineLimit(story || dynamicTypeSize.isAccessibilitySize ? nil : 2)
                 .fixedSize(horizontal: false, vertical: true)
             if story, let line = piece.story, !line.isEmpty {
                 Text(line)
@@ -358,10 +361,13 @@ struct FittedDesigner: View {
         let width = Self.width(of: text, size: size, tracking: base.tracking) + base.tracking * size + 1
         guard width > room, width > 0 else { return (base, 1) }
         let to = (13 * room / width * 4).rounded(.down) / 4
+        // (Never below 11pt as drawn: in the style's own units, before Dynamic Type grows it, that's 11 × 13 / size.)
+        let least = 11 * base.size / size
         var style = base
-        style.size = max(11, to)
+        style.growsWith = base.relativeTo
+        style.size = max(least, to)
         style.lineHeight = 17 / style.size
-        return (style, to >= 11 ? 1 : 2)
+        return (style, to >= least ? 1 : 2)
     }
 
     /// The line's width in Tenor Sans capitals at `size`, with its letter spacing (the site measures `scrollWidth`).

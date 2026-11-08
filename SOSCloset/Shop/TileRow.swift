@@ -57,6 +57,7 @@ struct TileRow: View {
                 }
                 .buttonStyle(TilePress())
                 .accessibilityLabel(category)
+                .accessibilityShowsLargeContentViewer { Text(category) }
                 .offset(y: shown || reduceMotion ? 0 : 22)
                 .opacity(shown ? 1 : 0)
                 .animation(
@@ -67,6 +68,8 @@ struct TileRow: View {
         .padding(.top, 14)
         .frame(maxWidth: .infinity, alignment: .top)
         .frame(height: Self.height, alignment: .top)
+        // (A table of contents of fixed tiles: it keeps its size, and a long press shows a label large.)
+        .dynamicTypeSize(...DynamicTypeSize.large)
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Categories")
         .onAppear { shown = true }
@@ -84,6 +87,7 @@ struct CompactTileRow: View {
     let onPick: (String) -> Void
 
     @Namespace private var underline
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     static let height: CGFloat = 62
 
@@ -116,9 +120,11 @@ struct CompactTileRow: View {
                 .buttonStyle(TilePress())
                 .accessibilityLabel(category)
                 .accessibilityAddTraits(on ? [.isSelected] : [])
+                .accessibilityShowsLargeContentViewer { Text(category) }
             }
         }
-        .animation(Motion.easeOut(0.45), value: current)
+        // (Reduce Motion: the underline moves to its section at once, without sliding.)
+        .animation(reduceMotion ? nil : Motion.easeOut(0.45), value: current)
         .padding(.top, 6)
         .frame(maxWidth: .infinity, alignment: .top)
         .frame(height: Self.height, alignment: .top)
