@@ -39,23 +39,19 @@ struct TurnBack: Equatable {
     var photo: Int
 }
 
-/// Where the shopper is: the tab bar's tab, the Shop page along the map, each tab's stack of pieces' pages, and the
-/// bag's count for the Bag tab's badge.
+/// Where the shopper is: the tab bar's tab, the Shop page along the map, and each tab's stack of pieces' pages.
 @MainActor @Observable
 final class AppState {
     var tab: AppTab = .home
-    /// The pieces' pages opened over Home, and over Shop (each tab keeps its own, as iOS does).
+    /// The pieces' pages opened over Home, over Shop and over the bag (each tab keeps its own, as iOS does).
     var homePath: [PieceRoute] = []
     var shopPath: [PieceRoute] = []
+    var bagPath: [PieceRoute] = []
     /// The photo the piece's page on screen is showing (SPEC §5).
     var turnBack: TurnBack?
     private(set) var place: ShopPlace = .all
     /// Which way the last move along the map went (+1 rightward, −1 leftward), for the page's push.
     private(set) var direction = 1
-    /// The pieces in the bag (the Bag tab's badge, hidden at zero). The bag itself comes with `bag/checkout`.
-    var bagCount = 0
-    /// The sizes added to the bag (their variant ids): a stand-in until `bag/checkout` makes the bag a Shopify cart.
-    private(set) var bagVariants: [String] = []
     /// The scroll of the Shop page on screen. Each trip to a page starts a new one (a page opens at its top, or at the
     /// section it was opened at), so the page leaving keeps its own as it slides away.
     private(set) var shopScroll: PageScroll
@@ -63,11 +59,9 @@ final class AppState {
     init() {
         shopScroll = Self.scroll(for: .all, landing: nil)
         #if DEBUG
-        // For side-by-side screenshots with the app prototype, whose tab bar shows two pieces in the bag:
-        // launch with `-SOSPreviewBagCount 2`. Debug builds only.
-        // and `-SOSPreviewTab shop -SOSPreviewPlace women` opens on that page.
+        // For side-by-side screenshots with the app prototype: `-SOSPreviewTab shop -SOSPreviewPlace women` opens on
+        // that page (the bag's own preview is in `Bag`). Debug builds only.
         let defaults = UserDefaults.standard
-        bagCount = defaults.integer(forKey: "SOSPreviewBagCount")
         let places: [String: ShopPlace] = ["all": .all, "women": .women, "men": .men, "jewelry": .jewelry]
         if let place = defaults.string(forKey: "SOSPreviewPlace").flatMap({ places[$0] }) {
             self.place = place
@@ -82,27 +76,21 @@ final class AppState {
         #endif
     }
 
-    /// Opens a piece's page over the page it was tapped on (Home or Shop), on the photo its card was showing, zooming
-    /// out of that card's photo (`zoomID`) when there is one.
+    /// Opens a piece's page over the page it was tapped on (Home, Shop or the bag), on the photo its card was showing,
+    /// zooming out of that card's photo (`zoomID`) when there is one.
     func open(_ piece: Piece, photo: Int = 0, zoomID: String? = nil) {
         let route = PieceRoute(piece: piece, photo: photo, zoomID: zoomID)
         turnBack = nil
-        if tab == .home {
+        switch tab {
+        case .home:
             homePath.append(route)
-        } else {
+        case .bag:
+            bagPath.append(route)
+        default:
             tab = .shop
             shopPath.append(route)
         }
     }
-
-    /// Adds a piece's size to the bag: every piece is one of one, so a size already in it adds nothing (SPEC §11).
-    func addToBag(variant: String) {
-        guard !bagVariants.contains(variant) else { return }
-        bagVariants.append(variant)
-        bagCount += 1
-    }
-
-    func inBag(_ variant: String) -> Bool { bagVariants.contains(variant) }
 
     /// Opens Shop at a place on the map, at its top or landing at a section (and a type in it): from Home it's always
     /// a move to the right (Home is left of everything). A link to a category in a small department's case opens the

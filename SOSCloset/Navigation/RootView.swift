@@ -12,10 +12,13 @@ struct RootView: View {
     @State private var closet = Closet.forThisBuild()
     /// The hearted pieces, kept on the phone (APP-SPEC §3.8).
     @State private var saved = SavedPieces()
+    /// The bag: Sam's store's cart, or the sample store's list (APP-SPEC §3.7).
+    @State private var bag = Bag.forThisBuild()
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         @Bindable var app = app
+        @Bindable var bag = bag
         TabView(selection: $app.tab) {
             Tab(value: AppTab.home) {
                 NavigationStack(path: $app.homePath) { HomeView().pieceDestinations() }
@@ -33,25 +36,46 @@ struct RootView: View {
                 tabLabel("Saved", symbol: "heart", for: .saved)
             }
             Tab(value: AppTab.bag) {
-                NavigationStack { BagView() }
+                NavigationStack(path: $app.bagPath) { BagView().pieceDestinations() }
             } label: {
                 tabLabel("Bag", symbol: "bag", for: .bag)
             }
-            .badge(app.bagCount)
-            .accessibilityLabel(app.bagCount == 0 ? "Bag" : "Bag, \(app.bagCount) \(app.bagCount == 1 ? "piece" : "pieces")")
+            .badge(bag.count)
+            .accessibilityLabel(bag.count == 0 ? "Bag" : "Bag, \(bag.count) \(bag.count == 1 ? "piece" : "pieces")")
         }
         .tabBarMinimizeBehavior(.onScrollDown)
         .tint(.ink)
+        // Adding a piece opens the bag: a sheet from the bottom, half height then full, glass at half height, swiped
+        // down to close (APP-SPEC §3.7, §4). Checkout opens over it, or over the Bag tab.
+        .sheet(item: $bag.sheet) { added in
+            BagSheet(added: added)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+                // A panel: the thicker system material (APP-SPEC §4), so what's behind it shows as a soft blur, not
+                // its colors.
+                .presentationBackground(.thickMaterial)
+                .checkout(over: .sheet)
+                .environment(app)
+                .environment(closet)
+                .environment(saved)
+                .environment(bag)
+        }
+        .checkout(over: .page)
         .environment(app)
         .environment(closet)
         .environment(saved)
+        .environment(bag)
         .task {
             await closet.load()
             #if DEBUG
             openPreviewPiece()
             #endif
         }
-        .onChange(of: scenePhase) { _, phase in _ = closet.scenePhaseChanged(to: phase) }
+        .task { await bag.load() }
+        .onChange(of: scenePhase) { _, phase in
+            _ = closet.scenePhaseChanged(to: phase)
+            bag.scenePhaseChanged(to: phase)
+        }
     }
 
     #if DEBUG

@@ -146,6 +146,20 @@ nonisolated extension TextStyle {
     /// A message under Add to Bag ("This piece has sold."): 14px, line height 1.5.
     static let productMessage = TextStyle(face: .body(.regular), size: 14, lineHeight: 1.5)
 
+    // The bag (SPEC §11; the app prototype's Bag).
+    /// "Bag": the display face, 25px, .1em spaced capitals.
+    static let bagTitle = TextStyle(face: .display, size: 25, tracking: 0.1, uppercase: true)
+    /// Remove: 13px, underlined.
+    static let bagRemove = TextStyle(face: .body(.regular), size: 13)
+    /// The subtotal's row: 16px (its amount 600); shipping's row 14px.
+    static let bagSubtotal = TextStyle(face: .body(.regular), size: 16)
+    static let bagSubtotalAmount = TextStyle(face: .body(.semibold), size: 16)
+    static let bagRow = TextStyle(face: .body(.regular), size: 14)
+    /// "Your bag is empty.": 17px, 500.
+    static let bagEmpty = TextStyle(face: .body(.medium), size: 17)
+    /// Continue shopping: 13px, 600, .04em.
+    static let smallButton = TextStyle(face: .body(.semibold), size: 13, tracking: 0.04)
+
     // Home (SPEC §11a; the site's 05-home.css at phone widths, as the app prototype has them).
     /// "Beautiful things.": the display face, 40px, .01em, line height 1.06.
     static let homeTitle = TextStyle(face: .display, size: 40, tracking: 0.01, lineHeight: 1.06)

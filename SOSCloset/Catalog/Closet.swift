@@ -62,14 +62,17 @@ import SwiftUI
 
     // MARK: Reading the closet
 
-    /// The piece with this handle, if it's for sale.
+    /// The piece with this handle, if it's for sale. (It reads `pieces` first, so a view asking is redrawn when the
+    /// closet comes in.)
     func piece(handle: String) -> Piece? {
-        byHandle[handle].map { pieces[$0] }
+        let all = pieces
+        return byHandle[handle].flatMap { all.indices.contains($0) ? all[$0] : nil }
     }
 
     /// The piece with this id (its id: tag, or its handle; what Saved keeps), if it's for sale.
     func piece(id: String) -> Piece? {
-        byID[id].map { pieces[$0] }
+        let all = pieces
+        return byID[id].flatMap { all.indices.contains($0) ? all[$0] : nil }
     }
 
     /// How many pieces for sale a department has, or one of its categories (the home page's View all, "117 pieces").

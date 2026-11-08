@@ -380,15 +380,14 @@ private struct ProductDescription: View {
 
 /// Add to Bag fills the row (square: content is square), the heart a 52pt square beside it, which pops when saved. A
 /// piece in several sizes asks for one first, above the row (sizes that sold drop out). Once it's in the bag the
-/// button says so and leads there. A sold piece says so plainly.
-///
-/// Until `bag/checkout`, the bag is a stand-in on the phone: the Bag tab counts the piece, and the bag's sheet and
-/// Shopify's cart come with that step.
+/// button says so and leads there. A sold piece says so plainly. Adding opens the bag's sheet with the piece; if
+/// Shopify refuses it, or it's missing from the cart's answer, the row says "That piece has just sold." (APP-SPEC §3.7).
 private struct BagRow: View {
     let piece: Piece
     let detail: ProductDetail?
 
     @Environment(AppState.self) private var app
+    @Environment(Bag.self) private var bag
     @Environment(SavedPieces.self) private var saved
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var pick: String?
@@ -418,19 +417,25 @@ private struct BagRow: View {
             } else {
                 if sized { sizes }
                 HStack(spacing: 10) {
-                    if let variant, app.inBag(variant.id) {
+                    if let variant, bag.contains(variant: variant.id) {
                         bigButton("In your bag · View Bag", style: .outline) { app.tab = .bag }
                     } else {
+                        let busy = variant != nil && bag.adding == variant?.id
                         // (Until a size is picked, the button is the site's disabled one: stone, muted.)
                         bigButton(
-                            variant == nil && detail != nil ? "Choose a size" : "Add to Bag",
+                            variant == nil && detail != nil ? "Choose a size" : busy ? "Adding…" : "Add to Bag",
                             style: variant == nil ? .off : .solid
                         ) {
-                            if let variant { app.addToBag(variant: variant.id) }
+                            if let variant { Task { await bag.add(variantId: variant.id) } }
                         }
-                        .disabled(variant == nil)
+                        .disabled(variant == nil || bag.adding != nil)
                     }
                     heart
+                }
+                if let variant, let problem = bag.problems[variant.id] {
+                    Text(problem)
+                        .textStyle(.productMessage)
+                        .foregroundStyle(.ink2)
                 }
             }
         }
