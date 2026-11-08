@@ -43,9 +43,10 @@ struct TurnBack: Equatable {
 @MainActor @Observable
 final class AppState {
     var tab: AppTab = .home
-    /// The pieces' pages opened over Home, over Shop and over the bag (each tab keeps its own, as iOS does).
+    /// The pieces' pages opened over Home, Shop, Saved and the bag (each tab keeps its own, as iOS does).
     var homePath: [PieceRoute] = []
     var shopPath: [PieceRoute] = []
+    var savedPath: [PieceRoute] = []
     var bagPath: [PieceRoute] = []
     /// The photo the piece's page on screen is showing (SPEC §5).
     var turnBack: TurnBack?
@@ -76,7 +77,7 @@ final class AppState {
         #endif
     }
 
-    /// Opens a piece's page over the page it was tapped on (Home, Shop or the bag), on the photo its card was showing,
+    /// Opens a piece's page over the page it was tapped on (Home, Shop, Saved or the bag), on the photo its card was showing,
     /// zooming out of that card's photo (`zoomID`) when there is one.
     func open(_ piece: Piece, photo: Int = 0, zoomID: String? = nil) {
         let route = PieceRoute(piece: piece, photo: photo, zoomID: zoomID)
@@ -84,6 +85,8 @@ final class AppState {
         switch tab {
         case .home:
             homePath.append(route)
+        case .saved:
+            savedPath.append(route)
         case .bag:
             bagPath.append(route)
         default:

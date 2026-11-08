@@ -159,6 +159,8 @@ nonisolated extension TextStyle {
     static let bagEmpty = TextStyle(face: .body(.medium), size: 17)
     /// Continue shopping: 13px, 600, .04em.
     static let smallButton = TextStyle(face: .body(.semibold), size: 13, tracking: 0.04)
+    /// Saved's hint when it's empty ("Tap the heart on any piece to keep it here."): 15px, muted.
+    static let savedHint = TextStyle(face: .body(.regular), size: 15, lineHeight: 1.5)
 
     // Home (SPEC §11a; the site's 05-home.css at phone widths, as the app prototype has them).
     /// "Beautiful things.": the display face, 40px, .01em, line height 1.06.

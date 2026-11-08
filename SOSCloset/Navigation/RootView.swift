@@ -31,7 +31,7 @@ struct RootView: View {
                 tabLabel("Shop", symbol: "hanger", for: .shop)
             }
             Tab(value: AppTab.saved) {
-                NavigationStack { SavedView() }
+                NavigationStack(path: $app.savedPath) { SavedView().pieceDestinations() }
             } label: {
                 tabLabel("Saved", symbol: "heart", for: .saved)
             }
