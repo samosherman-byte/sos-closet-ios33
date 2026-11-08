@@ -18,12 +18,12 @@ struct RootView: View {
         @Bindable var app = app
         TabView(selection: $app.tab) {
             Tab(value: AppTab.home) {
-                NavigationStack { HomeView() }
+                NavigationStack(path: $app.homePath) { HomeView().pieceDestinations() }
             } label: {
                 tabLabel("Home", symbol: "house", for: .home)
             }
             Tab(value: AppTab.shop) {
-                NavigationStack { ShopView() }
+                NavigationStack(path: $app.shopPath) { ShopView().pieceDestinations() }
             } label: {
                 tabLabel("Shop", symbol: "hanger", for: .shop)
             }
@@ -45,9 +45,27 @@ struct RootView: View {
         .environment(app)
         .environment(closet)
         .environment(saved)
-        .task { await closet.load() }
+        .task {
+            await closet.load()
+            #if DEBUG
+            openPreviewPiece()
+            #endif
+        }
         .onChange(of: scenePhase) { _, phase in _ = closet.scenePhaseChanged(to: phase) }
     }
+
+    #if DEBUG
+    /// For side-by-side screenshots with the prototype's product page: `-SOSPreviewTab shop -SOSPreviewPiece jackie`
+    /// opens that piece's page (by its id or handle) once the closet is in. Debug builds only.
+    private func openPreviewPiece() {
+        guard let key = UserDefaults.standard.string(forKey: "SOSPreviewPiece"),
+            let piece = closet.piece(id: key) ?? closet.piece(handle: key)
+        else { return }
+        var now = Transaction()
+        now.disablesAnimations = true
+        withTransaction(now) { app.open(piece) }
+    }
+    #endif
 
     /// Outlined, and filled only when selected, as in the app prototype (the system would fill them all). The hanger
     /// has no filled form, so Shop stays a line drawing, as there.

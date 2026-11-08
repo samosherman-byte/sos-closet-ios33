@@ -7,6 +7,15 @@ struct CompactTiles {
     var onPick: (String) -> Void
 }
 
+/// A piece's page (SPEC §10): Back and the place line where the tab row would be, and what the directory opens on.
+struct PieceTop {
+    var words: PlaceWords
+    /// The piece's department and category, for the directory's "where you are".
+    var place: ShopPlace?
+    var section: String
+    var back: () -> Void
+}
+
 /// The site's header at the top of Home and Shop (APP-SPEC §7; SPEC §3): the classic flat header on white. The top
 /// row is Menu on the left and the logo in the middle (Search and Bag are in the tab bar), and under it the tab row,
 /// the map, between hairlines.
@@ -38,6 +47,10 @@ struct SiteHeader: View {
     /// A page with a tile row: its compact copy, for the way back up.
     var compact: CompactTiles? = nil
     var compactCurrent = ""
+    /// A piece's page: its Back and place line take the tab row's place, flat on the page at rest, and float up into
+    /// the top row in glass as the page scrolls down (the logo making way); scrolling back up brings them back under the
+    /// logo (SPEC §10, "Phones: the bar takes the tabs' place").
+    var piece: PieceTop? = nil
     var directoryOpen = false
     let onMenu: () -> Void
     var onPlace: () -> Void = {}
@@ -50,10 +63,16 @@ struct SiteHeader: View {
     static let rowHeight: CGFloat = 44
     static let tabRowHeight: CGFloat = 1 + rowHeight + 1
     static let height: CGFloat = rowHeight + tabRowHeight
+    /// A piece's page: the row Back and the place line sit in under the top row (56pt, no hairline).
+    static let pieceRowHeight: CGFloat = 56
 
     private var narrow: Bool { width < Layout.narrowWidth }
-    private var tabsShown: Bool { showsMap ? mode != .down : !scrolled }
+    private var tabsShown: Bool { showsMap || piece != nil ? mode != .down : !scrolled }
     private var lineOn: Bool { mode == .down && place != nil && !directoryOpen }
+    /// A piece's Back and place line in the top row.
+    private var pieceUp: Bool { mode == .down && piece != nil && !directoryOpen }
+    /// The logo and the key make way.
+    private var rowAway: Bool { lineOn || pieceUp }
     private var compactOn: Bool { mode == .up && compact != nil && !directoryOpen }
 
     var body: some View {
@@ -63,9 +82,13 @@ struct SiteHeader: View {
                 topRow
                     .background(alignment: .top) { band }
             case .tabs:
-                VStack(spacing: 0) {
-                    if showsMap { tabRow }
-                    compactRow
+                if let piece {
+                    pieceRow(piece)
+                } else {
+                    VStack(spacing: 0) {
+                        if showsMap { tabRow }
+                        compactRow
+                    }
                 }
             }
         }
@@ -79,16 +102,16 @@ struct SiteHeader: View {
         ZStack(alignment: .leading) {
             logo
                 .frame(maxWidth: .infinity)
-                .opacity(lineOn ? 0 : 1)
-                .blur(radius: lineOn && !reduceMotion ? 8 : 0)
-                .animation(.easeOut(duration: 0.3), value: lineOn)
+                .opacity(rowAway ? 0 : 1)
+                .blur(radius: rowAway && !reduceMotion ? 8 : 0)
+                .animation(.easeOut(duration: 0.3), value: rowAway)
             key
                 .padding(.leading, 12)
-                .opacity(lineOn ? 0 : 1)
-                .blur(radius: lineOn && !reduceMotion ? 6 : 0)
-                .allowsHitTesting(!lineOn)
-                .accessibilityHidden(lineOn)
-                .animation(.easeOut(duration: 0.3).delay(lineOn ? 0 : 0.1), value: lineOn)
+                .opacity(rowAway ? 0 : 1)
+                .blur(radius: rowAway && !reduceMotion ? 6 : 0)
+                .allowsHitTesting(!rowAway)
+                .accessibilityHidden(rowAway)
+                .animation(.easeOut(duration: 0.3).delay(rowAway ? 0 : 0.1), value: rowAway)
             if let place, lineOn {
                 PlaceLine(words: place, rollFrom: rollFrom, room: width - 32 - PlaceLine.chrome, action: onPlace)
                     .frame(maxWidth: width - 32, alignment: .leading)
@@ -192,6 +215,50 @@ struct SiteHeader: View {
         .accessibilityAddTraits(on ? [.isSelected] : [])
     }
 
+    // MARK: A piece's Back and place line
+
+    /// Flat on white at rest, 7pt down in their 56pt row; heading down the page they rise 50pt into the top row on the
+    /// glass and turn to Liquid Glass (~.45s), and heading back up they come back down. While the directory is open
+    /// over the page they step aside for the × (the place line folds into the key). Reduce Motion: they fade from one
+    /// place to the other.
+    private func pieceRow(_ piece: PieceTop) -> some View {
+        let up = mode == .down
+        let hidden = directoryOpen && up
+        let rise = -(Self.rowHeight - 1 + 7)
+        return ZStack(alignment: .topLeading) {
+            Rectangle().fill(.paper)
+                .opacity(tabsShown ? 1 : 0)
+                .allowsHitTesting(false)
+            if reduceMotion {
+                pieceBar(piece, floating: false)
+                    .opacity(up ? 0 : 1)
+                    .allowsHitTesting(!up)
+                    .accessibilityHidden(up)
+                pieceBar(piece, floating: true)
+                    .offset(y: rise)
+                    .opacity(up && !hidden ? 1 : 0)
+                    .allowsHitTesting(up && !hidden)
+                    .accessibilityHidden(!up || hidden)
+            } else {
+                pieceBar(piece, floating: up)
+                    .offset(y: up ? rise : 0)
+                    .opacity(hidden ? 0 : 1)
+                    .blur(radius: hidden ? 6 : 0)
+                    .allowsHitTesting(!hidden)
+                    .accessibilityHidden(hidden)
+            }
+        }
+        .frame(height: Self.pieceRowHeight, alignment: .top)
+        .animation(reduceMotion ? .easeOut(duration: 0.2) : Motion.easeOut(0.45), value: up)
+        .animation(.easeOut(duration: 0.3), value: hidden)
+    }
+
+    private func pieceBar(_ piece: PieceTop, floating: Bool) -> some View {
+        PieceBar(piece: piece, width: width, floating: floating, onPlace: onPlace)
+            .padding(.leading, 12)
+            .padding(.top, 7)
+    }
+
     // MARK: The compact tile row
 
     /// Only on the way up, hanging from the header; it appears and leaves with the tabs, dematerializing the same way
@@ -220,6 +287,44 @@ struct SiteHeader: View {
             .ignoresSafeArea(edges: .top)
             .opacity(tabsShown ? 1 : 0)
             .allowsHitTesting(false)
+    }
+}
+
+/// A piece's round Back and its place line, 8pt apart (SPEC §10): WOMEN / Handbags on a phone (the line stops at the
+/// category), the line no wider than the row less Back. Flat on the page at rest; in Liquid Glass while floating.
+struct PieceBar: View {
+    let piece: PieceTop
+    let width: CGFloat
+    let floating: Bool
+    let onPlace: () -> Void
+
+    var body: some View {
+        let line = width - 12 - 16 - 50
+        HStack(spacing: 8) {
+            BackKey(flat: !floating, action: piece.back)
+            PlaceLine(words: piece.words, rollFrom: .bottom, room: line - PlaceLine.chrome, flat: !floating, action: onPlace)
+                .frame(maxWidth: line, alignment: .leading)
+                .fixedSize(horizontal: true, vertical: false)
+        }
+    }
+}
+
+/// The round Back (42pt on phones; the site's 1.6-stroke chevron at 18pt). It says only "Back" (SPEC §10).
+struct BackKey: View {
+    var flat = false
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Polyline(box: CGSize(width: 24, height: 24), points: [(14.5, 5.5), (8, 12), (14.5, 18.5)])
+                .stroke(.ink, style: StrokeStyle(lineWidth: 1.6, lineCap: .round, lineJoin: .round))
+                .frame(width: 18, height: 18)
+                .frame(width: 42, height: 42)
+                .flatOrGlass(flat, in: .circle)
+                .contentShape(.circle)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Back")
     }
 }
 

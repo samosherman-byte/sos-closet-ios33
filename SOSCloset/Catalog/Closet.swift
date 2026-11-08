@@ -77,6 +77,13 @@ import SwiftUI
         pieces.reduce(0) { n, p in n + (p.dept == dept && (cat == nil || p.cat == cat) ? 1 : 0) }
     }
 
+    /// A piece's page from the closet as last loaded, at once: the sample store's records carry everything; Shopify's
+    /// catalog has the photos, the tags and the sizes but not the description or the written details, which
+    /// `productDetail(handle:)` then brings.
+    func cachedDetail(handle: String) -> ProductDetail? {
+        records.first { $0.handle == handle }.flatMap(toProductDetail)
+    }
+
     /// Everything a piece's page shows, a sold piece's too (its page says it has sold); nil when the store has no
     /// such product. Throws when the store can't be reached.
     func productDetail(handle: String) async throws -> ProductDetail? {

@@ -112,6 +112,18 @@ enum HeaderMode: Equatable, Sendable {
 
     private func reached(_ top: CGFloat) -> Bool { top <= y + Self.reachSlack }
 
+    /// How far the page has scrolled (0 at rest).
+    var offset: CGFloat { y }
+
+    /// Moves the page by `delta` at once, with nothing animated: something above the view changed height, and what's
+    /// on screen stays where it is (SPEC §1.5, "The page adapts; your place doesn't").
+    func jump(by delta: CGFloat) {
+        let target = max(0, y + delta)
+        var now = Transaction()
+        now.disablesAnimations = true
+        withTransaction(now) { position.scrollTo(y: target) }
+    }
+
     // MARK: Moving
 
     /// Glides the page so a heading lands just under the top row, with the tabs away (SPEC §3: the tile row is the

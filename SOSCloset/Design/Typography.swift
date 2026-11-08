@@ -117,6 +117,35 @@ nonisolated extension TextStyle {
     /// A button (the site's `.btn`): 14px, 600, .04em.
     static let button = TextStyle(face: .body(.semibold), size: 14, tracking: 0.04)
 
+    // The product page (SPEC §10; the site's 08-product.css at phone widths, as the app prototype has it).
+    /// The designer leads: the display face, 28px, .16em spaced capitals, line height 1.15.
+    static let productDesigner = TextStyle(face: .display, size: 28, tracking: 0.16, uppercase: true, lineHeight: 1.15)
+    /// The piece's name under it, as a caption: 18px, 500, −.005em, line height 1.35.
+    static let productName = TextStyle(face: .body(.medium), size: 18, tracking: -0.005, lineHeight: 1.35)
+    /// The price: 22px, 600.
+    static let productPrice = TextStyle(face: .body(.semibold), size: 22)
+    /// The status beside it: 11px, 600, .14em spaced capitals, muted.
+    static let productMarks = TextStyle(face: .body(.semibold), size: 11, tracking: 0.14, uppercase: true)
+    /// The description: 15px, line height 1.65.
+    static let productDescription = TextStyle(face: .body(.regular), size: 15, lineHeight: 1.65)
+    /// Read more and Read less: 14px, 600, .02em, underlined.
+    static let readMore = TextStyle(face: .body(.semibold), size: 14, tracking: 0.02)
+    /// Add to Bag (the site's `.btn.lg`): 15px, 600, .04em.
+    static let bigButton = TextStyle(face: .body(.semibold), size: 15, tracking: 0.04)
+    /// The two lines under it: 13px, line height 1.5.
+    static let productNote = TextStyle(face: .body(.regular), size: 13, lineHeight: 1.5)
+    /// What a fold (Details, Shipping & returns) holds: 15px; the list's lines 1.45 apart, the shipping words 1.6.
+    static let foldList = TextStyle(face: .body(.regular), size: 15, lineHeight: 1.45)
+    static let foldText = TextStyle(face: .body(.regular), size: 15, lineHeight: 1.6)
+    /// The photo counter (2 / 7): 12px, .08em.
+    static let photoCounter = TextStyle(face: .body(.regular), size: 12, tracking: 0.08)
+    /// "Labels & markings": 11px, 600, .14em spaced capitals, muted.
+    static let proofLabel = TextStyle(face: .body(.semibold), size: 11, tracking: 0.14, uppercase: true)
+    /// A size to choose (the site's `.fchip`): 14px.
+    static let sizeChip = TextStyle(face: .body(.regular), size: 14)
+    /// A message under Add to Bag ("This piece has sold."): 14px, line height 1.5.
+    static let productMessage = TextStyle(face: .body(.regular), size: 14, lineHeight: 1.5)
+
     // Home (SPEC §11a; the site's 05-home.css at phone widths, as the app prototype has them).
     /// "Beautiful things.": the display face, 40px, .01em, line height 1.06.
     static let homeTitle = TextStyle(face: .display, size: 40, tracking: 0.01, lineHeight: 1.06)
